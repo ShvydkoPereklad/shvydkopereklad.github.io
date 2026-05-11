@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Kolesnikova"
+  given-names: "Yuliya"
+  orcid: "https://orcid.org/0009-0000-6151-7415"
+title: "ShvydkoPereklad"
+version: 1.0
+doi: 10.5281/zenodo.20119684
+date-released: 2026-05-11
+url: "https://github.com/ShvydkoPereklad/shvydkopereklad.github.io"
+license: MIT
