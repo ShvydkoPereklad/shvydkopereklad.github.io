@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<!-- MIT License
+Copyright (c) 2026 Yuliya Kolesnikova <0009-0000-6151-7415@orcid.org>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+
+<!-- Primary Meta Tags -->
+<link rel="icon" type="image/x-icon" href="favicon.ico"/>
+<meta name="description" content="ШвидкоПереклад — Free AI Translator">
+<title>ШвидкоПереклад — Free AI Translator</title>
+<meta name="title" content="ШвидкоПереклад — Free AI Translator">
+<meta name="description" content="Безкоштовний AI-перекладач. Переклад українська ↔ англійська / польська / німецька. Спеціалізація: офіційні документи, медичні терміни, юридичні папери. Розпізнавання тексту з фото. Free AI translator with photo OCR for official forms and documents.">
+<meta name="keywords" content="переклад, українська, English, Polski, Deutsch, translator, Ukrainian, Polish, German, OCR, documents, MyMemory, Google Translate, LibreTranslate, free translator, ШвидкоПереклад">
+<meta name="author" content="ШвидкоПереклад">
+<meta name="robots" content="index, follow">
+<meta name="language" content="Ukrainian, English, Polish, German">
+<meta name="theme-color" content="#0057b7">
+<meta name="application-name" content="ШвидкоПереклад">
+<meta name="apple-mobile-web-app-title" content="ШвидкоПереклад">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ШвидкоПереклад — Free AI Translator">
+<meta property="og:description" content="Безкоштовний AI-перекладач: документи, медицина, юридичні терміни. Розпізнавання фото. UA ↔ EN/PL/DE.">
+<meta property="og:locale" content="uk_UA">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:locale:alternate" content="pl_PL">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:site_name" content="ШвидкоПереклад">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ШвидкоПереклад — Free AI Translator">
+<meta name="twitter:description" content="Free AI translator: official documents, medical terms, legal paperwork. Photo OCR included.">
+
+<!-- Favicon (inline SVG - sunflower on Ukrainian flag background) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230057b7'/><stop offset='0.5' stop-color='%230057b7'/><stop offset='0.5' stop-color='%23ffd700'/><stop offset='1' stop-color='%23ffd700'/></linearGradient></defs><rect width='64' height='64' rx='12' fill='url(%23bg)'/><g transform='translate(32 32)'><g fill='%23ffb300'><ellipse rx='6' ry='14' transform='rotate(0)'/><ellipse rx='6' ry='14' transform='rotate(45)'/><ellipse rx='6' ry='14' transform='rotate(90)'/><ellipse rx='6' ry='14' transform='rotate(135)'/><ellipse rx='6' ry='14' transform='rotate(22.5)'/><ellipse rx='6' ry='14' transform='rotate(67.5)'/><ellipse rx='6' ry='14' transform='rotate(112.5)'/><ellipse rx='6' ry='14' transform='rotate(157.5)'/></g><circle r='8' fill='%234a2c0f'/><circle r='6' fill='%236b3e1a'/></g></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230057b7'/><stop offset='0.5' stop-color='%230057b7'/><stop offset='0.5' stop-color='%23ffd700'/><stop offset='1' stop-color='%23ffd700'/></linearGradient></defs><rect width='64' height='64' rx='12' fill='url(%23bg)'/><g transform='translate(32 32)'><g fill='%23ffb300'><ellipse rx='6' ry='14' transform='rotate(0)'/><ellipse rx='6' ry='14' transform='rotate(45)'/><ellipse rx='6' ry='14' transform='rotate(90)'/><ellipse rx='6' ry='14' transform='rotate(135)'/><ellipse rx='6' ry='14' transform='rotate(22.5)'/><ellipse rx='6' ry='14' transform='rotate(67.5)'/><ellipse rx='6' ry='14' transform='rotate(112.5)'/><ellipse rx='6' ry='14' transform='rotate(157.5)'/></g><circle r='8' fill='%234a2c0f'/><circle r='6' fill='%236b3e1a'/></g></svg>">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --primary: #0057b7;
+  --accent: #ffd700;
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #1a2332;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --shadow: 0 4px 20px rgba(0,87,183,0.08);
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #e8f0ff 0%, #fff8d6 100%);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 12px;
+  overflow-x: hidden;
+}
+
+.app { max-width: 1400px; margin: 0 auto; }
+
+header {
+  background: linear-gradient(135deg, var(--primary), #003d80);
+  color: white;
+  padding: 16px 20px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.logo-icon {
+  width: 44px; height: 44px;
+  background: var(--accent);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: bold; color: var(--primary);
+  flex-shrink: 0;
+}
+
+.logo-text { min-width: 0; }
+.logo h1 { font-size: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logo p { font-size: 11px; opacity: 0.85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.header-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.api-status {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.15);
+  padding: 6px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+
+.api-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.icon-btn {
+  background: rgba(255,255,255,0.15);
+  border: none; color: white;
+  width: 38px; height: 38px;
+  border-radius: 10px; cursor: pointer;
+  font-size: 16px; transition: all 0.2s;
+  position: relative;
+}
+
+.icon-btn:hover, .icon-btn:active { background: rgba(255,255,255,0.25); }
+
+.tabs {
+  display: flex; gap: 6px; margin-bottom: 16px;
+  background: var(--card); padding: 5px;
+  border-radius: 12px; box-shadow: var(--shadow);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1; min-width: 90px;
+  padding: 11px 14px; border: none;
+  background: transparent; border-radius: 8px;
+  cursor: pointer; font-weight: 600; font-size: 13px;
+  color: var(--muted); transition: all 0.2s; white-space: nowrap;
+}
+
+.tab.active { background: var(--primary); color: white; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--card);
+  border-radius: 14px; padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.lang-bar {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+
+.lang-select {
+  flex: 1; min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  background: white; cursor: pointer;
+  transition: all 0.2s;
+  max-width: 100%;
+}
+
+.lang-select:hover { border-color: var(--primary); }
+
+.swap-btn {
+  background: var(--primary); color: white;
+  border: none; width: 40px; height: 40px;
+  border-radius: 10px; cursor: pointer;
+  font-size: 18px; flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.swap-btn:hover, .swap-btn:active { transform: rotate(180deg); }
+
+.text-area {
+  width: 100%; min-height: 160px;
+  padding: 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px; font-family: inherit;
+  resize: vertical; transition: border-color 0.2s;
+}
+
+.text-area:focus { outline: none; border-color: var(--primary); }
+.text-area.readonly { background: #f9fafb; }
+
+.toolbar {
+  display: flex; gap: 6px;
+  margin-top: 10px; flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 14px; border: none;
+  border-radius: 10px; cursor: pointer;
+  font-weight: 600; font-size: 13px;
+  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #003d80; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary { background: var(--border); color: var(--text); }
+.btn-secondary:hover { background: #d1d5db; }
+
+.btn-accent { background: var(--accent); color: var(--primary); }
+
+.btn-danger { background: var(--danger); color: white; }
+
+.btn-full { width: 100%; justify-content: center; }
+
+.context-tags {
+  display: flex; gap: 6px;
+  margin-bottom: 10px; flex-wrap: wrap;
+}
+
+.tag {
+  padding: 6px 12px;
+  background: #f0f4ff; color: var(--primary);
+  border: 1px solid #d0dfff;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tag.active { background: var(--primary); color: white; }
+
+.section-title {
+  font-size: 12px; font-weight: 700;
+  color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.5px; margin-bottom: 10px;
+}
+
+.photo-area {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 30px 16px; text-align: center;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.photo-area:hover { border-color: var(--primary); background: #f0f4ff; }
+.photo-area.has-image { padding: 8px; }
+
+.photo-preview { max-width: 100%; max-height: 280px; border-radius: 8px; }
+
+.history-item {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 8px;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.history-item:hover, .history-item:active { background: #f0f4ff; border-color: var(--primary); }
+
+.history-meta {
+  font-size: 10px; color: var(--muted);
+  margin-bottom: 4px;
+  display: flex; justify-content: space-between;
+  gap: 6px; flex-wrap: wrap;
+}
+
+.history-text {
+  font-size: 13px; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.phrase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.phrase-card {
+  padding: 12px;
+  background: linear-gradient(135deg, #f0f4ff, #fff8d6);
+  border-radius: 12px;
+  cursor: pointer; transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.phrase-card:hover, .phrase-card:active {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0,87,183,0.15);
+}
+
+.phrase-card .uk { font-weight: 700; color: var(--primary); margin-bottom: 4px; font-size: 14px; }
+.phrase-card .tr { font-size: 13px; color: var(--text); }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+
+.loader {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast {
+  position: fixed; bottom: 20px;
+  left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--text); color: white;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 14px; z-index: 2000;
+  opacity: 0; pointer-events: none;
+  transition: all 0.3s;
+  max-width: calc(100vw - 32px); text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.error { background: var(--danger); }
+.toast.success { background: var(--success); }
+.toast.warn { background: var(--warn); }
+
+/* ============ CUSTOM MODAL ============ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1500;
+  padding: 16px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+
+.modal-overlay.show { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: white;
+  border-radius: 16px;
+  max-width: 440px; width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  transform: scale(0.9) translateY(20px);
+  transition: transform 0.25s;
+  display: flex; flex-direction: column;
+}
+
+.modal-overlay.show .modal { transform: scale(1) translateY(0); }
+
+.modal-header {
+  padding: 20px 20px 0;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.modal-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.modal-icon.info { background: #dbeafe; color: #1d4ed8; }
+.modal-icon.warn { background: #fee2e2; color: #dc2626; }
+.modal-icon.success { background: #d1fae5; color: #047857; }
+
+.modal-title {
+  font-size: 17px; font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.modal-body {
+  padding: 12px 20px 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-body p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.modal-body .muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.modal-body ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.modal-body li {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.modal-footer {
+  padding: 16px 20px 20px;
+  display: flex; gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.modal-footer .btn { min-width: 100px; justify-content: center; }
+
+.info-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 8px;
+  background: #e0f2fe; color: #0369a1;
+  border-radius: 20px;
+  font-size: 10px; font-weight: 600;
+  margin-left: 6px;
+}
+
+.context-note {
+  padding: 10px 12px;
+  background: #fef3c7;
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #78350f;
+  margin-top: 10px;
+}
+
+.provider-info {
+  display: flex; gap: 8px; align-items: center;
+  font-size: 11px; color: var(--muted);
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.provider-badge {
+  padding: 2px 8px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.hidden { display: none !important; }
+
+/* ============ SMALL SCREENS ============ */
+@media (max-width: 600px) {
+  body { padding: 8px; }
+  
+  header { padding: 12px 14px; border-radius: 14px; margin-bottom: 12px; }
+  .logo-icon { width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
+  .logo h1 { font-size: 17px; }
+  .logo p { font-size: 10px; }
+  .icon-btn { width: 36px; height: 36px; font-size: 15px; }
+  .api-status { display: none; }
+  
+  .tabs { padding: 4px; gap: 4px; margin-bottom: 12px; }
+  .tab { font-size: 12px; padding: 9px 10px; min-width: 75px; }
+  
+  .card { padding: 14px; border-radius: 12px; }
+  .main-grid { gap: 12px; }
+  
+  .text-area { min-height: 140px; font-size: 14px; padding: 10px; }
+  
+  .lang-select { padding: 9px 10px; font-size: 13px; }
+  .swap-btn { width: 38px; height: 38px; }
+  
+  .btn { padding: 9px 12px; font-size: 12px; min-height: 38px; }
+  
+  .tag { font-size: 11px; padding: 5px 10px; }
+  
+  .phrase-grid { grid-template-columns: 1fr; }
+  .phrase-card { padding: 12px; }
+  
+  .modal { max-width: 100%; border-radius: 14px; }
+  .modal-header { padding: 16px 16px 0; }
+  .modal-body { padding: 10px 16px 0; }
+  .modal-footer { padding: 12px 16px 16px; }
+  .modal-footer .btn { flex: 1; min-width: 0; }
+  .modal-title { font-size: 16px; }
+  .modal-icon { width: 40px; height: 40px; font-size: 20px; }
+}
+
+@media (max-width: 380px) {
+  .logo p { display: none; }
+  .tab { font-size: 11px; padding: 8px; min-width: 0; }
+  .btn { padding: 8px 10px; font-size: 12px; }
+  .text-area { min-height: 120px; }
+}
+
+/* ============ LANDSCAPE SMALL ============ */
+@media (orientation: landscape) and (max-height: 500px) {
+  header { padding: 10px 14px; margin-bottom: 10px; }
+  .logo-icon { width: 36px; height: 36px; font-size: 18px; }
+  .logo h1 { font-size: 16px; }
+  .logo p { display: none; }
+  .tabs { margin-bottom: 10px; }
+  .text-area { min-height: 100px; }
+  .card { padding: 12px; }
+  .main-grid { gap: 10px; }
+}
+
+/* ============ SAFE AREAS (notches) ============ */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🌻</div>
+      <div class="logo-text">
+        <h1>ШвидкоПереклад</h1>
+        <p>Free AI translator</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="api-status">
+        <div class="api-dot"></div>
+        <span>100% Free</span>
+      </div>
+      <button class="icon-btn" id="infoBtn" title="About">ℹ️</button>
+      <button class="icon-btn" id="clearAllBtn" title="Clear data">🗑️</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="translate">📝 Переклад</button>
+    <button class="tab" data-tab="photo">📷 Фото</button>
+    <button class="tab" data-tab="phrases">💬 Фрази</button>
+    <button class="tab" data-tab="history">📚 Історія</button>
+  </div>
+
+  <!-- TRANSLATE TAB -->
+  <div class="tab-content" id="tab-translate">
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-title">Контекст <span class="info-badge">🔍 Точність</span></div>
+      <div class="context-tags" id="contextTags">
+        <div class="tag active" data-ctx="general">🌐 Загальний</div>
+        <div class="tag" data-ctx="legal">⚖️ Юридичний</div>
+        <div class="tag" data-ctx="medical">🏥 Медичний</div>
+        <div class="tag" data-ctx="official">📋 Документи</div>
+        <div class="tag" data-ctx="education">🎓 Освіта</div>
+        <div class="tag" data-ctx="banking">🏦 Банк</div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="card">
+        <div class="lang-bar">
+          <select class="lang-select" id="srcLang">
+            <option value="uk">🇺🇦 Українська</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="pl">🇵🇱 Polski</option>
+            <option value="de">🇩🇪 Deutsch</option>
+          </select>
+          <button class="swap-btn" id="swapBtn">⇄</button>
+          <select class="lang-select" id="tgtLang">
+            <option value="en">🇬🇧 English</option>
+            <option value="uk">🇺🇦 Українська</option>
+            <option value="pl">🇵🇱 Polski</option>
+            <option value="de">🇩🇪 Deutsch</option>
+          </select>
+        </div>
+        <textarea class="text-area" id="srcText" placeholder="Введіть текст для перекладу..."></textarea>
+        <div class="toolbar">
+          <button class="btn btn-primary" id="translateBtn">🔄 Перекласти</button>
+          <button class="btn btn-secondary" id="micBtn">🎤 Голос</button>
+          <button class="btn btn-secondary" id="clearSrcBtn">✕ Очистити</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="lang-bar">
+          <strong style="color:var(--muted);font-size:12px">ПЕРЕКЛАД</strong>
+        </div>
+        <textarea class="text-area readonly" id="tgtText" readonly placeholder="Тут з'явиться переклад..."></textarea>
+        <div class="toolbar">
+          <button class="btn btn-secondary" id="copyBtn">📋 Копіювати</button>
+          <button class="btn btn-secondary" id="speakBtn">🔊 Озвучити</button>
+          <button class="btn btn-accent" id="saveBtn">⭐ Зберегти</button>
+        </div>
+        <div class="provider-info hidden" id="providerInfo">
+          <span>Переклад від:</span>
+          <span class="provider-badge" id="providerBadge">—</span>
+        </div>
+        <div class="context-note hidden" id="contextNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHOTO TAB -->
+  <div class="tab-content hidden" id="tab-photo">
+    <div class="main-grid">
+      <div class="card">
+        <div class="section-title">Фото документа</div>
+        <div class="photo-area" id="photoArea">
+          <div id="photoPlaceholder">
+            <div style="font-size:44px;margin-bottom:8px">📄</div>
+            <p style="font-weight:600;margin-bottom:4px;font-size:14px">Натисніть, щоб додати фото</p>
+            <p style="font-size:12px;color:var(--muted)">Форми, бланки, документи</p>
+          </div>
+          <img class="photo-preview hidden" id="photoPreview" alt="">
+        </div>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none">
+        <div class="toolbar">
+          <button class="btn btn-primary" id="uploadBtn">📁 Файл</button>
+          <button class="btn btn-secondary" id="cameraBtn">📷 Камера</button>
+          <button class="btn btn-secondary hidden" id="removePhotoBtn">✕ Видалити</button>
+        </div>
+        <div class="context-note" style="margin-top:12px">
+          💡 OCR працює у вашому браузері (Tesseract.js)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Розпізнаний текст</div>
+        <div class="lang-bar">
+          <select class="lang-select" id="photoSrcLang">
+            <option value="uk">🇺🇦 З української</option>
+            <option value="en">🇬🇧 З англійської</option>
+            <option value="pl">🇵🇱 З польської</option>
+            <option value="de">🇩🇪 З німецької</option>
+          </select>
+          <select class="lang-select" id="photoTgtLang">
+            <option value="uk">🇺🇦 Українською</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="pl">🇵🇱 Polski</option>
+            <option value="de">🇩🇪 Deutsch</option>
+          </select>
+        </div>
+        <div class="toolbar" style="margin-top:0;margin-bottom:10px">
+          <button class="btn btn-primary btn-full" id="ocrBtn">🔍 Розпізнати і перекласти</button>
+        </div>
+        <textarea class="text-area readonly" id="ocrResult" readonly placeholder="Тут з'явиться результат..."></textarea>
+        <div class="toolbar">
+          <button class="btn btn-secondary" id="copyOcrBtn">📋 Копіювати</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHRASES TAB -->
+  <div class="tab-content hidden" id="tab-phrases">
+    <div class="card">
+      <div class="section-title">Корисні фрази</div>
+      <div class="context-tags" id="phraseCategories">
+        <div class="tag active" data-cat="emergency">🚨 Екстрена</div>
+        <div class="tag" data-cat="medical">🏥 Медицина</div>
+        <div class="tag" data-cat="documents">📋 Документи</div>
+        <div class="tag" data-cat="housing">🏠 Житло</div>
+        <div class="tag" data-cat="work">💼 Робота</div>
+      </div>
+      <div class="lang-bar" style="margin-top:12px">
+        <select class="lang-select" id="phraseLang">
+          <option value="en">🇬🇧 English</option>
+          <option value="pl">🇵🇱 Polski</option>
+          <option value="de">🇩🇪 Deutsch</option>
+        </select>
+      </div>
+      <div class="phrase-grid" id="phraseGrid"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="tab-content hidden" id="tab-history">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin:0">Історія</div>
+        <button class="btn btn-secondary" id="clearHistBtn">🗑️ Очистити</button>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-icon info" id="modalIcon">ℹ️</div>
+      <div class="modal-title" id="modalTitle">Title</div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+const STORE_KEY = 'shvydkoperetlad_v3';
+const USAGE_KEY = 'shvydkoperetlad_usage';
+
+// Daily limits (silent — shown only in popups)
+const LIMITS = {
+  translate: 20,
+  scan: 15,
+};
+
+const LANG_NAMES = { uk: 'Ukrainian', en: 'English', pl: 'Polish', de: 'German' };
+const TESSERACT_LANGS = { uk: 'ukr', en: 'eng', pl: 'pol', de: 'deu' };
+
+const CONTEXT_HINTS = {
+  general: '',
+  legal: '⚖️ Юридичний контекст — зверніть увагу на точність термінів',
+  medical: '🏥 Медичний контекст — при серйозних питаннях проконсультуйтеся з перекладачем',
+  official: '📋 Офіційні документи — перевірте переклад перед поданням',
+  education: '🎓 Освітній контекст',
+  banking: '🏦 Банківський контекст — фінансові терміни можуть відрізнятися',
+};
+
+const PHRASES = {
+  emergency: [
+    { uk: 'Допоможіть мені, будь ласка', en: 'Please help me', pl: 'Proszę o pomoc', de: 'Bitte helfen Sie mir' },
+    { uk: 'Викличте поліцію', en: 'Call the police', pl: 'Zadzwoń na policję', de: 'Rufen Sie die Polizei' },
+    { uk: 'Мені потрібен лікар', en: 'I need a doctor', pl: 'Potrzebuję lekarza', de: 'Ich brauche einen Arzt' },
+    { uk: 'Я загубився', en: 'I am lost', pl: 'Zgubiłem się', de: 'Ich habe mich verlaufen' },
+    { uk: 'Я не розмовляю мовою', en: "I don't speak the language", pl: 'Nie mówię w tym języku', de: 'Ich spreche die Sprache nicht' },
+  ],
+  medical: [
+    { uk: 'У мене болить голова', en: 'I have a headache', pl: 'Boli mnie głowa', de: 'Ich habe Kopfschmerzen' },
+    { uk: 'У мене температура', en: 'I have a fever', pl: 'Mam gorączkę', de: 'Ich habe Fieber' },
+    { uk: 'Я алергік', en: 'I have allergies', pl: 'Mam alergie', de: 'Ich habe Allergien' },
+    { uk: 'Мені потрібні ліки', en: 'I need medicine', pl: 'Potrzebuję leków', de: 'Ich brauche Medikamente' },
+    { uk: 'Я вагітна', en: 'I am pregnant', pl: 'Jestem w ciąży', de: 'Ich bin schwanger' },
+  ],
+  documents: [
+    { uk: 'Де я можу зареєструватися?', en: 'Where can I register?', pl: 'Gdzie mogę się zarejestrować?', de: 'Wo kann ich mich registrieren?' },
+    { uk: 'Мені потрібен переклад', en: 'I need a translation', pl: 'Potrzebuję tłumaczenia', de: 'Ich brauche eine Übersetzung' },
+    { uk: 'Це мій паспорт', en: 'This is my passport', pl: 'To mój paszport', de: 'Das ist mein Reisepass' },
+    { uk: 'Я подаю заяву на статус', en: 'I am applying for status', pl: 'Ubiegam się o status', de: 'Ich beantrage einen Status' },
+  ],
+  housing: [
+    { uk: 'Я шукаю житло', en: 'I am looking for housing', pl: 'Szukam mieszkania', de: 'Ich suche eine Unterkunft' },
+    { uk: 'Скільки коштує оренда?', en: 'How much is the rent?', pl: 'Ile kosztuje czynsz?', de: 'Wie viel kostet die Miete?' },
+    { uk: 'Чи можу я заселитися сьогодні?', en: 'Can I move in today?', pl: 'Czy mogę się wprowadzić dziś?', de: 'Kann ich heute einziehen?' },
+  ],
+  work: [
+    { uk: 'Я шукаю роботу', en: 'I am looking for work', pl: 'Szukam pracy', de: 'Ich suche Arbeit' },
+    { uk: 'Який графік роботи?', en: 'What are the working hours?', pl: 'Jakie są godziny pracy?', de: 'Wie sind die Arbeitszeiten?' },
+    { uk: 'Яка зарплата?', en: 'What is the salary?', pl: 'Jaka jest pensja?', de: 'Wie hoch ist das Gehalt?' },
+  ],
+};
+
+let state = {
+  srcLang: 'uk', tgtLang: 'en',
+  srcText: '', tgtText: '',
+  context: 'general',
+  activeTab: 'translate',
+  history: [], saved: [],
+  photoData: null, ocrResult: '',
+  photoSrcLang: 'uk', photoTgtLang: 'en',
+  phraseCat: 'emergency', phraseLang: 'en',
+};
+
+// Usage stored separately
+let usage = {
+  date: '',      // YYYY-MM-DD
+  translate: 0,
+  scan: 0,
+};
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch(e) { console.error(e); }
+}
+
+function saveState() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+
+function loadUsage() {
+  try {
+    const raw = localStorage.getItem(USAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.date === todayStr()) {
+        usage = { ...usage, ...parsed };
+      } else {
+        usage = { date: todayStr(), translate: 0, scan: 0 };
+        saveUsage();
+      }
+    } else {
+      usage.date = todayStr();
+      saveUsage();
+    }
+  } catch(e) {
+    console.error(e);
+    usage = { date: todayStr(), translate: 0, scan: 0 };
+  }
+}
+
+function saveUsage() {
+  localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+}
+
+function checkRollover() {
+  if (usage.date !== todayStr()) {
+    usage = { date: todayStr(), translate: 0, scan: 0 };
+    saveUsage();
+  }
+}
+
+function incrementUsage(type) {
+  checkRollover();
+  usage[type] = (usage[type] || 0) + 1;
+  saveUsage();
+}
+
+function canUse(type) {
+  checkRollover();
+  return (usage[type] || 0) < LIMITS[type];
+}
+
+function remainingUsage(type) {
+  checkRollover();
+  return Math.max(0, LIMITS[type] - (usage[type] || 0));
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function msUntilReset() {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return tomorrow - now;
+}
+
+function formatResetTime() {
+  const ms = msUntilReset();
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return `${h} год ${m} хв`;
+  return `${m} хв`;
+}
+
+// ============ CUSTOM MODAL ============
+function showModal({ title, body, icon = 'info', buttons }) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modalOverlay');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalFooter = document.getElementById('modalFooter');
+    
+    const icons = { info: 'ℹ️', warn: '⚠️', success: '✅', question: '❓' };
+    modalIcon.textContent = icons[icon] || icons.info;
+    modalIcon.className = 'modal-icon ' + (icon === 'warn' ? 'warn' : icon === 'success' ? 'success' : 'info');
+    
+    modalTitle.textContent = title;
+    modalBody.innerHTML = body;
+    modalFooter.innerHTML = '';
+    
+    const btns = buttons || [{ label: 'OK', type: 'primary', value: true }];
+    btns.forEach((b, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-' + (b.type || 'secondary');
+      btn.textContent = b.label;
+      btn.onclick = () => closeModal(b.value);
+      modalFooter.appendChild(btn);
+      if (i === btns.length - 1) setTimeout(() => btn.focus(), 100);
+    });
+    
+    function closeModal(val) {
+      overlay.classList.remove('show');
+      document.removeEventListener('keydown', keyHandler);
+      overlay.removeEventListener('click', overlayHandler);
+      setTimeout(() => resolve(val), 200);
+    }
+    
+    function keyHandler(e) {
+      if (e.key === 'Escape') closeModal(false);
+      else if (e.key === 'Enter') {
+        const primary = btns.find(b => b.type === 'primary' || b.type === 'danger');
+        if (primary) closeModal(primary.value);
+      }
+    }
+    
+    function overlayHandler(e) {
+      if (e.target === overlay) closeModal(false);
+    }
+    
+    document.addEventListener('keydown', keyHandler);
+    overlay.addEventListener('click', overlayHandler);
+    overlay.classList.add('show');
+  });
+}
+
+async function alertModal(title, body, icon = 'info') {
+  return showModal({
+    title, body, icon,
+    buttons: [{ label: 'Зрозуміло', type: 'primary', value: true }],
+  });
+}
+
+async function confirmModal(title, body, { icon = 'question', okLabel = 'Так', cancelLabel = 'Скасувати', danger = false } = {}) {
+  return showModal({
+    title, body, icon,
+    buttons: [
+      { label: cancelLabel, type: 'secondary', value: false },
+      { label: okLabel, type: danger ? 'danger' : 'primary', value: true },
+    ],
+  });
+}
+
+async function limitReachedModal(type) {
+  const label = type === 'translate' ? 'перекладів' : 'сканувань';
+  const icon = type === 'translate' ? '📝' : '📷';
+  const max = LIMITS[type];
+  await alertModal(
+    'Денний ліміт досягнуто',
+    `<p>${icon} Ви використали всі <strong>${max} ${label}</strong> на сьогодні.</p>
+     <p class="muted">Ліміт скидається опівночі. До скидання: <strong>${formatResetTime()}</strong></p>
+     <p class="muted">Обмеження допомагає зберегти безкоштовні API-сервіси доступними для всіх користувачів.</p>`,
+    'warn'
+  );
+}
+
+// ============ FREE TRANSLATION PROVIDERS ============
+
+async function translateMyMemory(text, srcLang, tgtLang) {
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcLang}|${tgtLang}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('MyMemory error');
+  const data = await resp.json();
+  if (data.responseStatus != 200) throw new Error(data.responseDetails || 'MyMemory failed');
+  return { translation: data.responseData.translatedText, provider: 'MyMemory' };
+}
+
+async function translateGoogle(text, srcLang, tgtLang) {
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('Google error');
+  const data = await resp.json();
+  if (!data[0]) throw new Error('Google no result');
+  const translation = data[0].map(c => c[0]).filter(Boolean).join('');
+  return { translation, provider: 'Google Translate' };
+}
+
+async function translateLibre(text, srcLang, tgtLang) {
+  const instances = ['https://translate.terraprint.co', 'https://libretranslate.de', 'https://lt.vern.cc'];
+  for (const inst of instances) {
+    try {
+      const resp = await fetch(`${inst}/translate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: text, source: srcLang, target: tgtLang, format: 'text' }),
+      });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      if (data.translatedText) return { translation: data.translatedText, provider: 'LibreTranslate' };
+    } catch (e) { continue; }
+  }
+  throw new Error('LibreTranslate unavailable');
+}
+
+async function translate(text, srcLang, tgtLang) {
+  if (!text.trim()) return { translation: '', provider: '—' };
+  if (srcLang === tgtLang) return { translation: text, provider: 'same-lang' };
+  
+  const providers = [translateGoogle, translateMyMemory, translateLibre];
+  for (const fn of providers) {
+    try { return await fn(text, srcLang, tgtLang); }
+    catch (e) { console.warn(fn.name, e.message); }
+  }
+  throw new Error('Усі провайдери недоступні. Перевірте підключення до Інтернету.');
+}
+
+async function performOCR(imageDataUrl, langCode) {
+  const tessLang = TESSERACT_LANGS[langCode] || 'eng';
+  const worker = await Tesseract.createWorker(tessLang, 1, {
+    logger: m => {
+      if (m.status === 'recognizing text') {
+        document.getElementById('ocrBtn').innerHTML = `<span class="loader"></span> Розпізнавання ${Math.round(m.progress * 100)}%`;
+      } else if (m.status === 'loading language traineddata') {
+        document.getElementById('ocrBtn').innerHTML = `<span class="loader"></span> Завантаження моделі...`;
+      }
+    },
+  });
+  const { data } = await worker.recognize(imageDataUrl);
+  await worker.terminate();
+  return data.text;
+}
+
+// ============ UI ============
+
+function switchTab(name) {
+  state.activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${name}`));
+  if (name === 'phrases') renderPhrases();
+  if (name === 'history') renderHistory();
+  saveState();
+}
+
+function renderPhrases() {
+  const grid = document.getElementById('phraseGrid');
+  const list = PHRASES[state.phraseCat] || [];
+  grid.innerHTML = list.map(p => `
+    <div class="phrase-card" data-tr="${p[state.phraseLang].replace(/"/g,'&quot;')}">
+      <div class="uk">${p.uk}</div>
+      <div class="tr">${p[state.phraseLang]}</div>
+    </div>
+  `).join('');
+  grid.querySelectorAll('.phrase-card').forEach(c => {
+    c.onclick = () => {
+      navigator.clipboard?.writeText(c.dataset.tr);
+      showToast('Скопійовано!', 'success');
+      speak(c.dataset.tr, state.phraseLang);
+    };
+  });
+  document.querySelectorAll('#phraseCategories .tag').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === state.phraseCat);
+  });
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (state.history.length === 0) {
+    list.innerHTML = '<div class="empty-state">📭 Історія порожня</div>';
+    return;
+  }
+  list.innerHTML = state.history.map((h, i) => `
+    <div class="history-item" data-idx="${i}">
+      <div class="history-meta">
+        <span>${h.srcLang.toUpperCase()} → ${h.tgtLang.toUpperCase()} • ${h.context}</span>
+        <span>${new Date(h.time).toLocaleString()}</span>
+      </div>
+      <div class="history-text"><strong>${escapeHtml(h.src)}</strong></div>
+      <div class="history-text" style="color:var(--primary)">${escapeHtml(h.tgt)}</div>
+    </div>
+  `).join('');
+  list.querySelectorAll('.history-item').forEach(item => {
+    item.onclick = () => {
+      const h = state.history[item.dataset.idx];
+      Object.assign(state, {
+        srcLang: h.srcLang, tgtLang: h.tgtLang,
+        srcText: h.src, tgtText: h.tgt, context: h.context,
+      });
+      switchTab('translate');
+      restoreUI();
+    };
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function speak(text, lang) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const langMap = { uk: 'uk-UA', en: 'en-US', pl: 'pl-PL', de: 'de-DE' };
+  u.lang = langMap[lang] || 'en-US';
+  speechSynthesis.speak(u);
+}
+
+function showContextNote() {
+  const note = document.getElementById('contextNote');
+  const hint = CONTEXT_HINTS[state.context];
+  if (hint) { note.textContent = hint; note.classList.remove('hidden'); }
+  else note.classList.add('hidden');
+}
+
+function restoreUI() {
+  document.getElementById('srcLang').value = state.srcLang;
+  document.getElementById('tgtLang').value = state.tgtLang;
+  document.getElementById('srcText').value = state.srcText;
+  document.getElementById('tgtText').value = state.tgtText;
+  document.getElementById('photoSrcLang').value = state.photoSrcLang;
+  document.getElementById('photoTgtLang').value = state.photoTgtLang;
+  document.getElementById('phraseLang').value = state.phraseLang;
+  document.getElementById('ocrResult').value = state.ocrResult;
+  document.querySelectorAll('#contextTags .tag').forEach(t => {
+    t.classList.toggle('active', t.dataset.ctx === state.context);
+  });
+  if (state.photoData) showPhoto(state.photoData);
+  showContextNote();
+  switchTab(state.activeTab);
+}
+
+function showPhoto(dataUrl) {
+  document.getElementById('photoPreview').src = dataUrl;
+  document.getElementById('photoPreview').classList.remove('hidden');
+  document.getElementById('photoPlaceholder').classList.add('hidden');
+  document.getElementById('removePhotoBtn').classList.remove('hidden');
+  document.getElementById('photoArea').classList.add('has-image');
+}
+
+function hidePhoto() {
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoPlaceholder').classList.remove('hidden');
+  document.getElementById('removePhotoBtn').classList.add('hidden');
+  document.getElementById('photoArea').classList.remove('has-image');
+}
+
+// Events
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => switchTab(t.dataset.tab);
+});
+
+document.querySelectorAll('#contextTags .tag').forEach(t => {
+  t.onclick = () => {
+    state.context = t.dataset.ctx;
+    document.querySelectorAll('#contextTags .tag').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    showContextNote();
+    saveState();
+  };
+});
+
+document.querySelectorAll('#phraseCategories .tag').forEach(t => {
+  t.onclick = () => {
+    state.phraseCat = t.dataset.cat;
+    renderPhrases();
+    saveState();
+  };
+});
+
+document.getElementById('phraseLang').onchange = e => { state.phraseLang = e.target.value; renderPhrases(); saveState(); };
+document.getElementById('srcLang').onchange = e => { state.srcLang = e.target.value; saveState(); };
+document.getElementById('tgtLang').onchange = e => { state.tgtLang = e.target.value; saveState(); };
+document.getElementById('photoSrcLang').onchange = e => { state.photoSrcLang = e.target.value; saveState(); };
+document.getElementById('photoTgtLang').onchange = e => { state.photoTgtLang = e.target.value; saveState(); };
+document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); };
+
+document.getElementById('swapBtn').onclick = () => {
+  [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
+  [state.srcText, state.tgtText] = [state.tgtText, state.srcText];
+  restoreUI();
+  saveState();
+};
+
+document.getElementById('translateBtn').onclick = async () => {
+  if (!state.srcText.trim()) { showToast('Введіть текст для перекладу', 'error'); return; }
+  
+  if (!canUse('translate')) {
+    await limitReachedModal('translate');
+    return;
+  }
+  
+  const btn = document.getElementById('translateBtn');
+  btn.innerHTML = '<span class="loader"></span> Перекладаю...';
+  btn.disabled = true;
+  try {
+    const { translation, provider } = await translate(state.srcText, state.srcLang, state.tgtLang);
+    
+    incrementUsage('translate');
+    
+    state.tgtText = translation;
+    document.getElementById('tgtText').value = translation;
+    document.getElementById('providerBadge').textContent = provider;
+    document.getElementById('providerInfo').classList.remove('hidden');
+    state.history.unshift({
+      src: state.srcText, tgt: translation,
+      srcLang: state.srcLang, tgtLang: state.tgtLang,
+      context: state.context, provider, time: Date.now(),
+    });
+    state.history = state.history.slice(0, 100);
+    saveState();
+    
+    showToast(`✓ Готово (${provider})`, 'success');
+  } catch (err) {
+    showToast('❌ ' + err.message, 'error');
+  } finally {
+    btn.innerHTML = '🔄 Перекласти';
+    btn.disabled = false;
+  }
+};
+
+document.getElementById('clearSrcBtn').onclick = () => {
+  state.srcText = ''; state.tgtText = '';
+  document.getElementById('srcText').value = '';
+  document.getElementById('tgtText').value = '';
+  document.getElementById('providerInfo').classList.add('hidden');
+  saveState();
+};
+
+document.getElementById('copyBtn').onclick = () => {
+  if (state.tgtText) {
+    navigator.clipboard?.writeText(state.tgtText);
+    showToast('Скопійовано!', 'success');
+  }
+};
+
+document.getElementById('speakBtn').onclick = () => {
+  if (state.tgtText) speak(state.tgtText, state.tgtLang);
+};
+
+document.getElementById('saveBtn').onclick = () => {
+  if (state.tgtText) {
+    state.saved.unshift({
+      src: state.srcText, tgt: state.tgtText,
+      srcLang: state.srcLang, tgtLang: state.tgtLang, time: Date.now()
+    });
+    saveState();
+    showToast('⭐ Збережено', 'success');
+  }
+};
+
+document.getElementById('micBtn').onclick = () => {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    showToast('Голосовий ввід не підтримується', 'error');
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new SR();
+  const langMap = { uk: 'uk-UA', en: 'en-US', pl: 'pl-PL', de: 'de-DE' };
+  rec.lang = langMap[state.srcLang];
+  rec.onresult = e => {
+    const text = e.results[0][0].transcript;
+    state.srcText = (state.srcText + ' ' + text).trim();
+    document.getElementById('srcText').value = state.srcText;
+    saveState();
+  };
+  rec.onerror = () => showToast('Помилка розпізнавання', 'error');
+  rec.start();
+  showToast('🎤 Говоріть...');
+};
+
+document.getElementById('photoArea').onclick = () => document.getElementById('photoInput').click();
+document.getElementById('uploadBtn').onclick = e => { e.stopPropagation(); document.getElementById('photoInput').click(); };
+document.getElementById('cameraBtn').onclick = e => { e.stopPropagation(); document.getElementById('photoInput').click(); };
+
+document.getElementById('photoInput').onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    state.photoData = reader.result;
+    showPhoto(reader.result);
+    saveState();
+  };
+  reader.readAsDataURL(file);
+};
+
+document.getElementById('removePhotoBtn').onclick = async e => {
+  e.stopPropagation();
+  const ok = await confirmModal(
+    'Видалити фото?',
+    '<p>Фото та розпізнаний текст буде видалено.</p>',
+    { danger: true, okLabel: 'Видалити', icon: 'warn' }
+  );
+  if (!ok) return;
+  state.photoData = null; state.ocrResult = '';
+  document.getElementById('ocrResult').value = '';
+  hidePhoto(); saveState();
+};
+
+document.getElementById('ocrBtn').onclick = async () => {
+  if (!state.photoData) { showToast('Спочатку додайте фото', 'error'); return; }
+  
+  if (!canUse('scan')) {
+    await limitReachedModal('scan');
+    return;
+  }
+  
+  const btn = document.getElementById('ocrBtn');
+  btn.innerHTML = '<span class="loader"></span> Ініціалізація...';
+  btn.disabled = true;
+  try {
+    const ocrText = await performOCR(state.photoData, state.photoSrcLang);
+    if (!ocrText.trim()) throw new Error('Текст не знайдено на зображенні');
+    
+    incrementUsage('scan');
+    
+    btn.innerHTML = '<span class="loader"></span> Переклад...';
+    let translation = '', provider = '';
+    if (state.photoSrcLang !== state.photoTgtLang) {
+      if (canUse('translate')) {
+        try {
+          const r = await translate(ocrText, state.photoSrcLang, state.photoTgtLang);
+          translation = r.translation; provider = r.provider;
+          incrementUsage('translate');
+        } catch (e) { translation = '(Помилка: ' + e.message + ')'; }
+      } else {
+        translation = '(Ліміт перекладів вичерпано — показано лише розпізнаний текст)';
+      }
+    }
+    const result = `=== РОЗПІЗНАНО (${state.photoSrcLang.toUpperCase()}) ===\n\n${ocrText}\n\n${translation ? `=== ПЕРЕКЛАД (${state.photoTgtLang.toUpperCase()}) • ${provider} ===\n\n${translation}` : ''}`;
+    state.ocrResult = result;
+    document.getElementById('ocrResult').value = result;
+    saveState();
+    
+    showToast('✓ Готово', 'success');
+  } catch (err) {
+    showToast('❌ ' + err.message, 'error');
+  } finally {
+    btn.innerHTML = '🔍 Розпізнати і перекласти';
+    btn.disabled = false;
+  }
+};
+
+document.getElementById('copyOcrBtn').onclick = () => {
+  if (state.ocrResult) {
+    navigator.clipboard?.writeText(state.ocrResult);
+    showToast('Скопійовано!', 'success');
+  }
+};
+
+document.getElementById('clearHistBtn').onclick = async () => {
+  if (state.history.length === 0) { showToast('Історія вже порожня'); return; }
+  const ok = await confirmModal(
+    'Очистити історію?',
+    `<p>Буде видалено <strong>${state.history.length}</strong> записів. Цю дію неможливо скасувати.</p>`,
+    { danger: true, okLabel: 'Очистити', icon: 'warn' }
+  );
+  if (!ok) return;
+  state.history = []; renderHistory(); saveState();
+  showToast('Історію очищено', 'success');
+};
+
+document.getElementById('clearAllBtn').onclick = async () => {
+  const ok = await confirmModal(
+    'Видалити всі дані?',
+    `<p>Буде видалено:</p>
+     <ul>
+       <li>Історію перекладів</li>
+       <li>Збережені переклади</li>
+       <li>Завантажене фото</li>
+       <li>Налаштування</li>
+     </ul>
+     <p class="muted">Цю дію неможливо скасувати.</p>`,
+    { danger: true, okLabel: 'Видалити все', icon: 'warn' }
+  );
+  if (!ok) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+};
+
+document.getElementById('infoBtn').onclick = async () => {
+  await alertModal(
+    'ШвидкоПереклад',
+    `<p>Безкоштовний AI-перекладач зі спеціалізацією на офіційних документах, медичних та юридичних термінах.</p>
+     <p><strong>🌐 Переклад:</strong></p>
+     <ul>
+       <li>Google Translate (основний)</li>
+       <li>MyMemory (5000 слів/день)</li>
+       <li>LibreTranslate (резервний)</li>
+     </ul>
+     <p><strong>📷 OCR:</strong> Tesseract.js у браузері</p>
+     <p><strong>🔒 Приватність:</strong> Дані зберігаються локально, не передаються на сервери</p>
+     <p><strong>🌍 Мови:</strong> 🇺🇦 🇬🇧 🇵🇱 🇩🇪</p>`,
+    'info'
+  );
+};
+
+// Init
+loadState();
+loadUsage();
+restoreUI();
+renderPhrases();
+renderHistory();
+
+// Silent rollover check every minute
+setInterval(checkRollover, 60000);
+</script>
+</body>
+</html>
