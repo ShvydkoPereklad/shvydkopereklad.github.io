@@ -738,6 +738,98 @@ header {
 const STORE_KEY = 'shvydkoperetlad_v3';
 const USAGE_KEY = 'shvydkoperetlad_usage';
 
+/* ============ INDEXEDDB FOR IMAGES ============ */
+const IDB_NAME = 'shvydkoperetlad_db';
+const IDB_VERSION = 1;
+const IDB_STORE = 'images';
+const IDB_PHOTO_KEY = 'currentPhoto';
+
+let _idbPromise = null;
+function idbOpen() {
+  if (_idbPromise) return _idbPromise;
+  _idbPromise = new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('IndexedDB not supported'));
+      return;
+    }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return _idbPromise;
+}
+
+async function idbPut(key, value) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+async function idbGet(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDelete(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbClearStore() {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Convert Blob → data URL (used for OCR which expects data URL or HTMLImage)
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = () => reject(fr.error);
+    fr.readAsDataURL(blob);
+  });
+}
+
+// Track active object URL so we can revoke it
+let _activeObjectURL = null;
+function setPreviewFromBlob(blob) {
+  if (_activeObjectURL) {
+    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
+    _activeObjectURL = null;
+  }
+  const url = URL.createObjectURL(blob);
+  _activeObjectURL = url;
+  document.getElementById('photoPreview').src = url;
+}
+
+/* ============ END INDEXEDDB ============ */
+
 // Daily limits (silent — shown only in popups)
 const LIMITS = {
   translate: 10,
@@ -795,7 +887,7 @@ let state = {
   context: 'general',
   activeTab: 'translate',
   history: [], saved: [],
-  photoData: null, ocrResult: '',
+  hasPhoto: false, ocrResult: '',
   photoSrcLang: 'uk', photoTgtLang: 'en',
   phraseCat: 'emergency', phraseLang: 'en',
 };
@@ -815,12 +907,20 @@ function todayStr() {
 function loadState() {
   try {
     const saved = localStorage.getItem(STORE_KEY);
-    if (saved) state = { ...state, ...JSON.parse(saved) };
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Backward-compat: old versions stored photoData (data URL) inside state.
+      // Drop it from state — image now lives in IndexedDB.
+      if ('photoData' in parsed) delete parsed.photoData;
+      state = { ...state, ...parsed };
+    }
   } catch(e) { console.error(e); }
 }
 
 function saveState() {
-  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  // Make extra sure no photoData ever leaks into localStorage
+  const { photoData, ...clean } = state;
+  localStorage.setItem(STORE_KEY, JSON.stringify(clean));
 }
 
 function loadUsage() {
@@ -1024,7 +1124,7 @@ async function translate(text, srcLang, tgtLang) {
   throw new Error('Усі провайдери недоступні. Перевірте підключення до Інтернету.');
 }
 
-async function performOCR(imageDataUrl, langCode) {
+async function performOCR(imageSource, langCode) {
   const tessLang = TESSERACT_LANGS[langCode] || 'eng';
   const worker = await Tesseract.createWorker(tessLang, 1, {
     logger: m => {
@@ -1035,7 +1135,7 @@ async function performOCR(imageDataUrl, langCode) {
       }
     },
   });
-  const { data } = await worker.recognize(imageDataUrl);
+  const { data } = await worker.recognize(imageSource);
   await worker.terminate();
   return data.text;
 }
@@ -1121,7 +1221,7 @@ function showContextNote() {
   else note.classList.add('hidden');
 }
 
-function restoreUI() {
+async function restoreUI() {
   document.getElementById('srcLang').value = state.srcLang;
   document.getElementById('tgtLang').value = state.tgtLang;
   document.getElementById('srcText').value = state.srcText;
@@ -1133,13 +1233,29 @@ function restoreUI() {
   document.querySelectorAll('#contextTags .tag').forEach(t => {
     t.classList.toggle('active', t.dataset.ctx === state.context);
   });
-  if (state.photoData) showPhoto(state.photoData);
+  // Restore image from IndexedDB
+  if (state.hasPhoto) {
+    try {
+      const blob = await idbGet(IDB_PHOTO_KEY);
+      if (blob instanceof Blob) {
+        setPreviewFromBlob(blob);
+        showPhoto();
+      } else {
+        // No image found in IDB — clean state flag
+        state.hasPhoto = false;
+        saveState();
+      }
+    } catch (e) {
+      console.error('Failed to load image from IndexedDB', e);
+      state.hasPhoto = false;
+      saveState();
+    }
+  }
   showContextNote();
   switchTab(state.activeTab);
 }
 
-function showPhoto(dataUrl) {
-  document.getElementById('photoPreview').src = dataUrl;
+function showPhoto() {
   document.getElementById('photoPreview').classList.remove('hidden');
   document.getElementById('photoPlaceholder').classList.add('hidden');
   document.getElementById('removePhotoBtn').classList.remove('hidden');
@@ -1151,6 +1267,11 @@ function hidePhoto() {
   document.getElementById('photoPlaceholder').classList.remove('hidden');
   document.getElementById('removePhotoBtn').classList.add('hidden');
   document.getElementById('photoArea').classList.remove('has-image');
+  document.getElementById('photoPreview').removeAttribute('src');
+  if (_activeObjectURL) {
+    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
+    _activeObjectURL = null;
+  }
 }
 
 // Events
@@ -1186,7 +1307,10 @@ document.getElementById('srcText').oninput = e => { state.srcText = e.target.val
 document.getElementById('swapBtn').onclick = () => {
   [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
   [state.srcText, state.tgtText] = [state.tgtText, state.srcText];
-  restoreUI();
+  document.getElementById('srcLang').value = state.srcLang;
+  document.getElementById('tgtLang').value = state.tgtLang;
+  document.getElementById('srcText').value = state.srcText;
+  document.getElementById('tgtText').value = state.tgtText;
   saveState();
 };
 
@@ -1280,29 +1404,32 @@ document.getElementById('micBtn').onclick = () => {
 // ============ PHOTO INPUT HANDLING ============
 
 // Shared handler for both file and camera inputs
-function handlePhotoSelection(file) {
+async function handlePhotoSelection(file) {
   if (!file) return;
   if (!file.type.startsWith('image/')) {
     showToast('❌ Оберіть файл зображення', 'error');
     return;
   }
-  const reader = new FileReader();
-  reader.onload = () => {
-    state.photoData = reader.result;
+  try {
+    // Store as Blob in IndexedDB (much more efficient than base64)
+    await idbPut(IDB_PHOTO_KEY, file);
+    state.hasPhoto = true;
     state.ocrResult = '';
     document.getElementById('ocrResult').value = '';
-    showPhoto(reader.result);
+    setPreviewFromBlob(file);
+    showPhoto();
     saveState();
     showToast('✓ Фото завантажено', 'success');
-  };
-  reader.onerror = () => showToast('❌ Помилка читання файлу', 'error');
-  reader.readAsDataURL(file);
+  } catch (e) {
+    console.error(e);
+    showToast('❌ Не вдалося зберегти фото', 'error');
+  }
 }
 
 // Photo area: click on placeholder triggers file picker (gallery)
 document.getElementById('photoArea').onclick = (e) => {
   // Only trigger if no image is currently shown (placeholder visible)
-  if (!state.photoData) {
+  if (!state.hasPhoto) {
     document.getElementById('fileInput').click();
   }
 };
@@ -1342,16 +1469,19 @@ document.getElementById('removePhotoBtn').onclick = async e => {
     { danger: true, okLabel: 'Видалити', icon: 'warn' }
   );
   if (!ok) return;
-  state.photoData = null; state.ocrResult = '';
+  try { await idbDelete(IDB_PHOTO_KEY); } catch(err) { console.error(err); }
+  state.hasPhoto = false;
+  state.ocrResult = '';
   document.getElementById('ocrResult').value = '';
   // Clear file inputs
   document.getElementById('fileInput').value = '';
   document.getElementById('cameraInput').value = '';
-  hidePhoto(); saveState();
+  hidePhoto();
+  saveState();
 };
 
 document.getElementById('ocrBtn').onclick = async () => {
-  if (!state.photoData) { showToast('Спочатку додайте фото', 'error'); return; }
+  if (!state.hasPhoto) { showToast('Спочатку додайте фото', 'error'); return; }
   
   if (!canUse('scan')) {
     await limitReachedModal('scan');
@@ -1362,7 +1492,13 @@ document.getElementById('ocrBtn').onclick = async () => {
   btn.innerHTML = '<span class="loader"></span> Ініціалізація...';
   btn.disabled = true;
   try {
-    const ocrText = await performOCR(state.photoData, state.photoSrcLang);
+    // Fetch the image Blob from IndexedDB
+    const blob = await idbGet(IDB_PHOTO_KEY);
+    if (!(blob instanceof Blob)) throw new Error('Зображення не знайдено');
+    // Tesseract accepts Blob directly, but for maximum compatibility convert to data URL
+    const imageSource = await blobToDataURL(blob);
+    
+    const ocrText = await performOCR(imageSource, state.photoSrcLang);
     if (!ocrText.trim()) throw new Error('Текст не знайдено на зображенні');
     
     incrementUsage('scan');
@@ -1427,6 +1563,7 @@ document.getElementById('clearAllBtn').onclick = async () => {
     { danger: true, okLabel: 'Видалити все', icon: 'warn' }
   );
   if (!ok) return;
+  try { await idbClearStore(); } catch(e) { console.error(e); }
   localStorage.removeItem(STORE_KEY);
   location.reload();
 };
@@ -1442,11 +1579,18 @@ document.getElementById('infoBtn').onclick = async () => {
        <li>LibreTranslate (резервний)</li>
      </ul>
      <p><strong>📷 OCR:</strong> Tesseract.js у браузері</p>
-     <p><strong>🔒 Приватність:</strong> Дані зберігаються локально, не передаються на сервери</p>
+     <p><strong>🔒 Приватність:</strong> Дані зберігаються локально (LocalStorage + IndexedDB), не передаються на сервери</p>
      <p><strong>🌍 Мови:</strong> 🇺🇦 🇬🇧 🇵🇱 🇩🇪</p>`,
     'info'
   );
 };
+
+// Cleanup object URL on unload
+window.addEventListener('beforeunload', () => {
+  if (_activeObjectURL) {
+    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
+  }
+});
 
 // Init
 loadState();
