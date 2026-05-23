@@ -616,7 +616,7 @@ header {
         <div class="lang-bar">
           <strong style="color:var(--muted);font-size:12px">ПЕРЕКЛАД</strong>
         </div>
-        <textarea class="text-area readonly" id="tgtText" readonly placeholder="Тут з'явиться переклад..."></textarea>
+        <textarea class="text-area" id="tgtText" placeholder="Тут з'явиться переклад (можна редагувати)..."></textarea>
         <div class="toolbar">
           <button class="btn btn-secondary" id="copyBtn">📋 Копіювати</button>
           <button class="btn btn-secondary" id="speakBtn">🔊 Озвучити</button>
@@ -1303,6 +1303,7 @@ document.getElementById('tgtLang').onchange = e => { state.tgtLang = e.target.va
 document.getElementById('photoSrcLang').onchange = e => { state.photoSrcLang = e.target.value; saveState(); };
 document.getElementById('photoTgtLang').onchange = e => { state.photoTgtLang = e.target.value; saveState(); };
 document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); };
+document.getElementById('tgtText').oninput = e => { state.tgtText = e.target.value; saveState(); };
 
 document.getElementById('swapBtn').onclick = () => {
   [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
