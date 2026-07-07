@@ -15,40 +15,19 @@ Copyright (c) 2025-2026 Yuliya Kolesnikova <0009-0000-6151-7415@orcid.org>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 
-<!-- Primary Meta Tags -->
 <title>ШвидкоПереклад — Free AI Translator</title>
 <meta name="title" content="ШвидкоПереклад — Free AI Translator">
-<meta name="description" content="Безкоштовний AI-перекладач. Переклад українська ↔ англійська / польська / німецька. Спеціалізація: офіційні документи, медичні терміни, юридичні папери. Розпізнавання тексту з фото. Free AI translator with photo OCR for official forms and documents.">
-<meta name="keywords" content="переклад, українська, English, Polski, Deutsch, translator, Ukrainian, Polish, German, OCR, documents, MyMemory, Google Translate, LibreTranslate, free translator, ШвидкоПереклад">
+<meta name="description" content="Безкоштовний AI-перекладач. Переклад українська ↔ англійська / польська / німецька / чеська. Спеціалізація: офіційні документи, медичні терміни, юридичні папери. Розпізнавання тексту з фото.">
+<meta name="keywords" content="переклад, українська, English, Polski, Deutsch, Čeština, translator, OCR, ШвидкоПереклад">
 <meta name="author" content="ШвидкоПереклад">
 <meta name="robots" content="index, follow">
-<meta name="language" content="Ukrainian, English, Polish, German">
 <meta name="theme-color" content="#0057b7">
 <meta name="application-name" content="ШвидкоПереклад">
 <meta name="apple-mobile-web-app-title" content="ШвидкоПереклад">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="format-detection" content="telephone=no">
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="ШвидкоПереклад — Free AI Translator">
-<meta property="og:description" content="Безкоштовний AI-перекладач: документи, медицина, юридичні терміни. Розпізнавання фото. UA ↔ EN/PL/DE.">
-<meta property="og:locale" content="uk_UA">
-<meta property="og:locale:alternate" content="en_US">
-<meta property="og:locale:alternate" content="pl_PL">
-<meta property="og:locale:alternate" content="de_DE">
-<meta property="og:site_name" content="ШвидкоПереклад">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ШвидкоПереклад — Free AI Translator">
-<meta name="twitter:description" content="Free AI translator: official documents, medical terms, legal paperwork. Photo OCR included.">
-
-<!-- Favicon (inline SVG - sunflower on Ukrainian flag background) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230057b7'/><stop offset='0.5' stop-color='%230057b7'/><stop offset='0.5' stop-color='%23ffd700'/><stop offset='1' stop-color='%23ffd700'/></linearGradient></defs><rect width='64' height='64' rx='12' fill='url(%23bg)'/><g transform='translate(32 32)'><g fill='%23ffb300'><ellipse rx='6' ry='14' transform='rotate(0)'/><ellipse rx='6' ry='14' transform='rotate(45)'/><ellipse rx='6' ry='14' transform='rotate(90)'/><ellipse rx='6' ry='14' transform='rotate(135)'/><ellipse rx='6' ry='14' transform='rotate(22.5)'/><ellipse rx='6' ry='14' transform='rotate(67.5)'/><ellipse rx='6' ry='14' transform='rotate(112.5)'/><ellipse rx='6' ry='14' transform='rotate(157.5)'/></g><circle r='8' fill='%234a2c0f'/><circle r='6' fill='%236b3e1a'/></g></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%230057b7'/><stop offset='0.5' stop-color='%230057b7'/><stop offset='0.5' stop-color='%23ffd700'/><stop offset='1' stop-color='%23ffd700'/></linearGradient></defs><rect width='64' height='64' rx='12' fill='url(%23bg)'/><g transform='translate(32 32)'><g fill='%23ffb300'><ellipse rx='6' ry='14' transform='rotate(0)'/><ellipse rx='6' ry='14' transform='rotate(45)'/><ellipse rx='6' ry='14' transform='rotate(90)'/><ellipse rx='6' ry='14' transform='rotate(135)'/><ellipse rx='6' ry='14' transform='rotate(22.5)'/><ellipse rx='6' ry='14' transform='rotate(67.5)'/><ellipse rx='6' ry='14' transform='rotate(112.5)'/><ellipse rx='6' ry='14' transform='rotate(157.5)'/></g><circle r='8' fill='%234a2c0f'/><circle r='6' fill='%236b3e1a'/></g></svg>">
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -238,7 +217,19 @@ header {
 .btn-secondary { background: var(--border); color: var(--text); }
 .btn-secondary:hover { background: #d1d5db; }
 
+.btn-secondary.speaking {
+  background: var(--danger);
+  color: white;
+  animation: speakingPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes speakingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+}
+
 .btn-accent { background: var(--accent); color: var(--primary); }
+.btn-accent.saved { background: var(--success); color: white; }
 
 .btn-danger { background: var(--danger); color: white; }
 
@@ -284,6 +275,7 @@ header {
   border: 1px solid var(--border);
   border-radius: 10px; margin-bottom: 8px;
   cursor: pointer; transition: all 0.2s;
+  position: relative;
 }
 
 .history-item:hover, .history-item:active { background: #f0f4ff; border-color: var(--primary); }
@@ -300,6 +292,14 @@ header {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
+.item-actions {
+  display: flex; gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.item-actions .btn { padding: 6px 10px; font-size: 11px; min-height: 32px; }
+
 .phrase-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -312,12 +312,18 @@ header {
   border-radius: 12px;
   cursor: pointer; transition: all 0.2s;
   border: 1px solid transparent;
+  position: relative;
 }
 
 .phrase-card:hover, .phrase-card:active {
   transform: translateY(-2px);
   border-color: var(--primary);
   box-shadow: 0 4px 12px rgba(0,87,183,0.15);
+}
+
+.phrase-card.speaking {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.2);
 }
 
 .phrase-card .uk { font-weight: 700; color: var(--primary); margin-bottom: 4px; font-size: 14px; }
@@ -353,7 +359,6 @@ header {
 .toast.success { background: var(--success); }
 .toast.warn { background: var(--warn); }
 
-/* ============ CUSTOM MODAL ============ */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(15, 23, 42, 0.6);
@@ -478,7 +483,6 @@ header {
 
 .hidden { display: none !important; }
 
-/* ============ SMALL SCREENS ============ */
 @media (max-width: 600px) {
   body { padding: 8px; }
   
@@ -523,7 +527,6 @@ header {
   .text-area { min-height: 120px; }
 }
 
-/* ============ LANDSCAPE SMALL ============ */
 @media (orientation: landscape) and (max-height: 500px) {
   header { padding: 10px 14px; margin-bottom: 10px; }
   .logo-icon { width: 36px; height: 36px; font-size: 18px; }
@@ -535,7 +538,6 @@ header {
   .main-grid { gap: 10px; }
 }
 
-/* ============ SAFE AREAS (notches) ============ */
 @supports (padding: max(0px)) {
   body {
     padding-left: max(12px, env(safe-area-inset-left));
@@ -570,6 +572,7 @@ header {
     <button class="tab active" data-tab="translate">📝 Переклад</button>
     <button class="tab" data-tab="photo">📷 Фото</button>
     <button class="tab" data-tab="phrases">💬 Фрази</button>
+    <button class="tab" data-tab="saved">⭐ Збережені</button>
     <button class="tab" data-tab="history">📚 Історія</button>
   </div>
 
@@ -595,6 +598,7 @@ header {
             <option value="en">🇬🇧 English</option>
             <option value="pl">🇵🇱 Polski</option>
             <option value="de">🇩🇪 Deutsch</option>
+            <option value="cs">🇨🇿 Čeština</option>
           </select>
           <button class="swap-btn" id="swapBtn">⇄</button>
           <select class="lang-select" id="tgtLang">
@@ -602,6 +606,7 @@ header {
             <option value="uk">🇺🇦 Українська</option>
             <option value="pl">🇵🇱 Polski</option>
             <option value="de">🇩🇪 Deutsch</option>
+            <option value="cs">🇨🇿 Čeština</option>
           </select>
         </div>
         <textarea class="text-area" id="srcText" placeholder="Введіть текст для перекладу..."></textarea>
@@ -644,7 +649,6 @@ header {
           </div>
           <img class="photo-preview hidden" id="photoPreview" alt="">
         </div>
-        <!-- Two separate file inputs: one for gallery, one for camera -->
         <input type="file" id="fileInput" accept="image/*" style="display:none">
         <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
         <div class="toolbar">
@@ -665,12 +669,14 @@ header {
             <option value="en">🇬🇧 З англійської</option>
             <option value="pl">🇵🇱 З польської</option>
             <option value="de">🇩🇪 З німецької</option>
+            <option value="cs">🇨🇿 З чеської</option>
           </select>
           <select class="lang-select" id="photoTgtLang">
             <option value="uk">🇺🇦 Українською</option>
             <option value="en">🇬🇧 English</option>
             <option value="pl">🇵🇱 Polski</option>
             <option value="de">🇩🇪 Deutsch</option>
+            <option value="cs">🇨🇿 Čeština</option>
           </select>
         </div>
         <div class="toolbar" style="margin-top:0;margin-bottom:10px">
@@ -679,6 +685,7 @@ header {
         <textarea class="text-area readonly" id="ocrResult" readonly placeholder="Тут з'явиться результат..."></textarea>
         <div class="toolbar">
           <button class="btn btn-secondary" id="copyOcrBtn">📋 Копіювати</button>
+          <button class="btn btn-secondary" id="speakOcrBtn">🔊 Озвучити</button>
         </div>
       </div>
     </div>
@@ -700,9 +707,21 @@ header {
           <option value="en">🇬🇧 English</option>
           <option value="pl">🇵🇱 Polski</option>
           <option value="de">🇩🇪 Deutsch</option>
+          <option value="cs">🇨🇿 Čeština</option>
         </select>
       </div>
       <div class="phrase-grid" id="phraseGrid"></div>
+    </div>
+  </div>
+
+  <!-- SAVED TAB -->
+  <div class="tab-content hidden" id="tab-saved">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin:0">Збережені переклади</div>
+        <button class="btn btn-secondary" id="clearSavedBtn">🗑️ Очистити</button>
+      </div>
+      <div id="savedList"></div>
     </div>
   </div>
 
@@ -806,7 +825,6 @@ async function idbClearStore() {
   });
 }
 
-// Convert Blob → data URL (used for OCR which expects data URL or HTMLImage)
 function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
@@ -816,7 +834,6 @@ function blobToDataURL(blob) {
   });
 }
 
-// Track active object URL so we can revoke it
 let _activeObjectURL = null;
 function setPreviewFromBlob(blob) {
   if (_activeObjectURL) {
@@ -828,16 +845,11 @@ function setPreviewFromBlob(blob) {
   document.getElementById('photoPreview').src = url;
 }
 
-/* ============ END INDEXEDDB ============ */
+const LIMITS = { translate: 20, scan: 15 };
 
-// Daily limits (silent — shown only in popups)
-const LIMITS = {
-  translate: 10,
-  scan: 8,
-};
-
-const LANG_NAMES = { uk: 'Ukrainian', en: 'English', pl: 'Polish', de: 'German' };
-const TESSERACT_LANGS = { uk: 'ukr', en: 'eng', pl: 'pol', de: 'deu' };
+const LANG_NAMES = { uk: 'Ukrainian', en: 'English', pl: 'Polish', de: 'German', cs: 'Czech' };
+const TESSERACT_LANGS = { uk: 'ukr', en: 'eng', pl: 'pol', de: 'deu', cs: 'ces' };
+const SPEECH_LANG_MAP = { uk: 'uk-UA', en: 'en-US', pl: 'pl-PL', de: 'de-DE', cs: 'cs-CZ' };
 
 const CONTEXT_HINTS = {
   general: '',
@@ -850,34 +862,34 @@ const CONTEXT_HINTS = {
 
 const PHRASES = {
   emergency: [
-    { uk: 'Допоможіть мені, будь ласка', en: 'Please help me', pl: 'Proszę o pomoc', de: 'Bitte helfen Sie mir' },
-    { uk: 'Викличте поліцію', en: 'Call the police', pl: 'Zadzwoń na policję', de: 'Rufen Sie die Polizei' },
-    { uk: 'Мені потрібен лікар', en: 'I need a doctor', pl: 'Potrzebuję lekarza', de: 'Ich brauche einen Arzt' },
-    { uk: 'Я загубився', en: 'I am lost', pl: 'Zgubiłem się', de: 'Ich habe mich verlaufen' },
-    { uk: 'Я не розмовляю мовою', en: "I don't speak the language", pl: 'Nie mówię w tym języku', de: 'Ich spreche die Sprache nicht' },
+    { uk: 'Допоможіть мені, будь ласка', en: 'Please help me', pl: 'Proszę o pomoc', de: 'Bitte helfen Sie mir', cs: 'Prosím, pomozte mi' },
+    { uk: 'Викличте поліцію', en: 'Call the police', pl: 'Zadzwoń na policję', de: 'Rufen Sie die Polizei', cs: 'Zavolejte policii' },
+    { uk: 'Мені потрібен лікар', en: 'I need a doctor', pl: 'Potrzebuję lekarza', de: 'Ich brauche einen Arzt', cs: 'Potřebuji lékaře' },
+    { uk: 'Я загубився', en: 'I am lost', pl: 'Zgubiłem się', de: 'Ich habe mich verlaufen', cs: 'Ztratil jsem se' },
+    { uk: 'Я не розмовляю мовою', en: "I don't speak the language", pl: 'Nie mówię w tym języku', de: 'Ich spreche die Sprache nicht', cs: 'Nemluvím tímto jazykem' },
   ],
   medical: [
-    { uk: 'У мене болить голова', en: 'I have a headache', pl: 'Boli mnie głowa', de: 'Ich habe Kopfschmerzen' },
-    { uk: 'У мене температура', en: 'I have a fever', pl: 'Mam gorączkę', de: 'Ich habe Fieber' },
-    { uk: 'Я алергік', en: 'I have allergies', pl: 'Mam alergie', de: 'Ich habe Allergien' },
-    { uk: 'Мені потрібні ліки', en: 'I need medicine', pl: 'Potrzebuję leków', de: 'Ich brauche Medikamente' },
-    { uk: 'Я вагітна', en: 'I am pregnant', pl: 'Jestem w ciąży', de: 'Ich bin schwanger' },
+    { uk: 'У мене болить голова', en: 'I have a headache', pl: 'Boli mnie głowa', de: 'Ich habe Kopfschmerzen', cs: 'Bolí mě hlava' },
+    { uk: 'У мене температура', en: 'I have a fever', pl: 'Mam gorączkę', de: 'Ich habe Fieber', cs: 'Mám horečku' },
+    { uk: 'Я алергік', en: 'I have allergies', pl: 'Mam alergie', de: 'Ich habe Allergien', cs: 'Mám alergii' },
+    { uk: 'Мені потрібні ліки', en: 'I need medicine', pl: 'Potrzebuję leków', de: 'Ich brauche Medikamente', cs: 'Potřebuji léky' },
+    { uk: 'Я вагітна', en: 'I am pregnant', pl: 'Jestem w ciąży', de: 'Ich bin schwanger', cs: 'Jsem těhotná' },
   ],
   documents: [
-    { uk: 'Де я можу зареєструватися?', en: 'Where can I register?', pl: 'Gdzie mogę się zarejestrować?', de: 'Wo kann ich mich registrieren?' },
-    { uk: 'Мені потрібен переклад', en: 'I need a translation', pl: 'Potrzebuję tłumaczenia', de: 'Ich brauche eine Übersetzung' },
-    { uk: 'Це мій паспорт', en: 'This is my passport', pl: 'To mój paszport', de: 'Das ist mein Reisepass' },
-    { uk: 'Я подаю заяву на статус', en: 'I am applying for status', pl: 'Ubiegam się o status', de: 'Ich beantrage einen Status' },
+    { uk: 'Де я можу зареєструватися?', en: 'Where can I register?', pl: 'Gdzie mogę się zarejestrować?', de: 'Wo kann ich mich registrieren?', cs: 'Kde se mohu zaregistrovat?' },
+    { uk: 'Мені потрібен переклад', en: 'I need a translation', pl: 'Potrzebuję tłumaczenia', de: 'Ich brauche eine Übersetzung', cs: 'Potřebuji překlad' },
+    { uk: 'Це мій паспорт', en: 'This is my passport', pl: 'To mój paszport', de: 'Das ist mein Reisepass', cs: 'Toto je můj pas' },
+    { uk: 'Я подаю заяву на статус', en: 'I am applying for status', pl: 'Ubiegam się o status', de: 'Ich beantrage einen Status', cs: 'Žádám o status' },
   ],
   housing: [
-    { uk: 'Я шукаю житло', en: 'I am looking for housing', pl: 'Szukam mieszkania', de: 'Ich suche eine Unterkunft' },
-    { uk: 'Скільки коштує оренда?', en: 'How much is the rent?', pl: 'Ile kosztuje czynsz?', de: 'Wie viel kostet die Miete?' },
-    { uk: 'Чи можу я заселитися сьогодні?', en: 'Can I move in today?', pl: 'Czy mogę się wprowadzić dziś?', de: 'Kann ich heute einziehen?' },
+    { uk: 'Я шукаю житло', en: 'I am looking for housing', pl: 'Szukam mieszkania', de: 'Ich suche eine Unterkunft', cs: 'Hledám bydlení' },
+    { uk: 'Скільки коштує оренда?', en: 'How much is the rent?', pl: 'Ile kosztuje czynsz?', de: 'Wie viel kostet die Miete?', cs: 'Kolik stojí nájem?' },
+    { uk: 'Чи можу я заселитися сьогодні?', en: 'Can I move in today?', pl: 'Czy mogę się wprowadzić dziś?', de: 'Kann ich heute einziehen?', cs: 'Mohu se nastěhovat dnes?' },
   ],
   work: [
-    { uk: 'Я шукаю роботу', en: 'I am looking for work', pl: 'Szukam pracy', de: 'Ich suche Arbeit' },
-    { uk: 'Який графік роботи?', en: 'What are the working hours?', pl: 'Jakie są godziny pracy?', de: 'Wie sind die Arbeitszeiten?' },
-    { uk: 'Яка зарплата?', en: 'What is the salary?', pl: 'Jaka jest pensja?', de: 'Wie hoch ist das Gehalt?' },
+    { uk: 'Я шукаю роботу', en: 'I am looking for work', pl: 'Szukam pracy', de: 'Ich suche Arbeit', cs: 'Hledám práci' },
+    { uk: 'Який графік роботи?', en: 'What are the working hours?', pl: 'Jakie są godziny pracy?', de: 'Wie sind die Arbeitszeiten?', cs: 'Jaká je pracovní doba?' },
+    { uk: 'Яка зарплата?', en: 'What is the salary?', pl: 'Jaka jest pensja?', de: 'Wie hoch ist das Gehalt?', cs: 'Jaký je plat?' },
   ],
 };
 
@@ -892,12 +904,7 @@ let state = {
   phraseCat: 'emergency', phraseLang: 'en',
 };
 
-// Usage stored separately
-let usage = {
-  date: '',
-  translate: 0,
-  scan: 0,
-};
+let usage = { date: '', translate: 0, scan: 0 };
 
 function todayStr() {
   const d = new Date();
@@ -909,16 +916,15 @@ function loadState() {
     const saved = localStorage.getItem(STORE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Backward-compat: old versions stored photoData (data URL) inside state.
-      // Drop it from state — image now lives in IndexedDB.
       if ('photoData' in parsed) delete parsed.photoData;
       state = { ...state, ...parsed };
+      if (!Array.isArray(state.saved)) state.saved = [];
+      if (!Array.isArray(state.history)) state.history = [];
     }
   } catch(e) { console.error(e); }
 }
 
 function saveState() {
-  // Make extra sure no photoData ever leaks into localStorage
   const { photoData, ...clean } = state;
   localStorage.setItem(STORE_KEY, JSON.stringify(clean));
 }
@@ -966,11 +972,6 @@ function canUse(type) {
   return (usage[type] || 0) < LIMITS[type];
 }
 
-function remainingUsage(type) {
-  checkRollover();
-  return Math.max(0, LIMITS[type] - (usage[type] || 0));
-}
-
 function showToast(msg, type = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -992,7 +993,7 @@ function formatResetTime() {
   return `${m} хв`;
 }
 
-// ============ CUSTOM MODAL ============
+// ============ MODAL ============
 function showModal({ title, body, icon = 'info', buttons }) {
   return new Promise((resolve) => {
     const overlay = document.getElementById('modalOverlay');
@@ -1074,7 +1075,349 @@ async function limitReachedModal(type) {
   );
 }
 
-// ============ FREE TRANSLATION PROVIDERS ============
+/* ============ TEXT-TO-SPEECH ENGINE ============ */
+const TTS = (() => {
+  const supported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  let voices = [];
+  let voicesLoaded = false;
+  let voicesLoadingPromise = null;
+  let currentUtterance = null;
+  let currentToken = 0; // increments on each speak() call
+  // Subscribers notified when speaking state changes (for UI updates)
+  const listeners = new Set();
+  // Per-call state: { token, button, pulseEl }
+  let activeCall = null;
+
+  function loadVoices() {
+    if (!supported) return Promise.resolve([]);
+    if (voicesLoaded) return Promise.resolve(voices);
+    if (voicesLoadingPromise) return voicesLoadingPromise;
+
+    voicesLoadingPromise = new Promise((resolve) => {
+      const tryGet = () => {
+        const list = window.speechSynthesis.getVoices();
+        if (list && list.length > 0) {
+          voices = list;
+          voicesLoaded = true;
+          resolve(voices);
+          return true;
+        }
+        return false;
+      };
+
+      if (tryGet()) return;
+
+      // Some browsers fire 'voiceschanged' asynchronously
+      const onChanged = () => {
+        if (tryGet()) {
+          window.speechSynthesis.removeEventListener('voiceschanged', onChanged);
+        }
+      };
+      window.speechSynthesis.addEventListener('voiceschanged', onChanged);
+
+      // Fallback: poll for up to 3 seconds
+      let attempts = 0;
+      const intv = setInterval(() => {
+        attempts++;
+        if (tryGet() || attempts > 30) {
+          clearInterval(intv);
+          window.speechSynthesis.removeEventListener('voiceschanged', onChanged);
+          if (!voicesLoaded) {
+            // Resolve with whatever we have (may be empty — browser will use default)
+            voices = window.speechSynthesis.getVoices() || [];
+            voicesLoaded = true;
+            resolve(voices);
+          }
+        }
+      }, 100);
+    });
+
+    return voicesLoadingPromise;
+  }
+
+  function pickVoice(langCode) {
+    if (!voices || voices.length === 0) return null;
+    const target = (SPEECH_LANG_MAP[langCode] || langCode || '').toLowerCase();
+    const short = target.split('-')[0];
+
+    // Exact match (e.g., uk-UA)
+    let v = voices.find(vo => (vo.lang || '').toLowerCase() === target);
+    if (v) return v;
+    // Match by primary language (e.g., uk)
+    v = voices.find(vo => (vo.lang || '').toLowerCase().startsWith(short + '-'));
+    if (v) return v;
+    v = voices.find(vo => (vo.lang || '').toLowerCase() === short);
+    if (v) return v;
+    // Loose match
+    v = voices.find(vo => (vo.lang || '').toLowerCase().includes(short));
+    return v || null;
+  }
+
+  function notify() {
+    listeners.forEach(fn => { try { fn(activeCall); } catch(e) {} });
+  }
+
+  function isSpeaking() {
+    return activeCall !== null;
+  }
+
+  function isCurrent(token) {
+    return activeCall && activeCall.token === token;
+  }
+
+  function stop() {
+    if (!supported) return;
+    try {
+      currentToken++; // invalidate any pending calls
+      window.speechSynthesis.cancel();
+    } catch(e) { console.warn('TTS stop error:', e); }
+    if (currentUtterance) {
+      // Detach handlers to avoid late firing
+      currentUtterance.onend = null;
+      currentUtterance.onerror = null;
+      currentUtterance.onstart = null;
+      currentUtterance = null;
+    }
+    if (activeCall) {
+      activeCall = null;
+      notify();
+    }
+  }
+
+  // speak({ text, lang, button }) returns a promise resolving when finished/cancelled
+  async function speak({ text, lang, button = null }) {
+    if (!supported) {
+      showToast('Озвучення не підтримується вашим браузером', 'error');
+      return false;
+    }
+    const trimmed = (text || '').trim();
+    if (!trimmed) {
+      showToast('Немає тексту для озвучення', 'warn');
+      return false;
+    }
+
+    // Always cancel previous speech first
+    stop();
+
+    // Wait for voices (with timeout inside loadVoices)
+    await loadVoices();
+
+    const myToken = ++currentToken;
+    const u = new SpeechSynthesisUtterance(trimmed);
+    const langTag = SPEECH_LANG_MAP[lang] || 'en-US';
+    u.lang = langTag;
+    const voice = pickVoice(lang);
+    if (voice) u.voice = voice;
+    u.rate = 0.95;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+
+    activeCall = { token: myToken, button, voice: voice ? voice.name : null, lang: langTag };
+    currentUtterance = u;
+    notify();
+
+    // Warn if no matching voice (some platforms still play with default)
+    if (!voice) {
+      console.warn('No TTS voice found for', lang, '— using default. Available:',
+        voices.map(v => `${v.name} (${v.lang})`).slice(0, 10));
+    }
+
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (ok) => {
+        if (settled) return;
+        settled = true;
+        if (currentToken === myToken) {
+          activeCall = null;
+          currentUtterance = null;
+          notify();
+        }
+        resolve(ok);
+      };
+
+      u.onend = () => finish(true);
+      u.onerror = (e) => {
+        // 'canceled' / 'interrupted' aren't real errors — ignore quietly
+        if (e && (e.error === 'canceled' || e.error === 'interrupted')) {
+          finish(false);
+        } else {
+          console.warn('TTS error:', e && e.error);
+          if (currentToken === myToken && !voice) {
+            showToast('Не знайдено голос для цієї мови', 'warn');
+          }
+          finish(false);
+        }
+      };
+
+      try {
+        // Chrome quirk: resume in case it's stuck in paused state
+        try { window.speechSynthesis.resume(); } catch(e) {}
+        window.speechSynthesis.speak(u);
+
+        // Chrome bug workaround: long utterances get cut off after ~15s.
+        // Periodic pause/resume keeps the queue alive.
+        const keepAlive = setInterval(() => {
+          if (currentToken !== myToken || !window.speechSynthesis.speaking) {
+            clearInterval(keepAlive);
+            return;
+          }
+          try {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          } catch(e) {}
+        }, 10000);
+      } catch (err) {
+        console.error('TTS speak failed:', err);
+        showToast('Помилка озвучення', 'error');
+        finish(false);
+      }
+    });
+  }
+
+  function onChange(fn) {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
+  }
+
+  // Kick off voice loading early
+  if (supported) loadVoices();
+
+  // Stop speech when page is hidden / unloaded
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+  });
+  window.addEventListener('beforeunload', stop);
+  window.addEventListener('pagehide', stop);
+
+  return { supported, speak, stop, isSpeaking, isCurrent, onChange, loadVoices };
+})();
+
+// Update visual state of all "speak" buttons whenever TTS state changes
+TTS.onChange(() => {
+  // Main speak button
+  const mainBtn = document.getElementById('speakBtn');
+  if (mainBtn) {
+    if (TTS.isSpeaking() && mainBtn._speakToken !== undefined && TTS.isCurrent(mainBtn._speakToken)) {
+      mainBtn.innerHTML = '⏹ Зупинити';
+      mainBtn.classList.add('speaking');
+    } else {
+      mainBtn.innerHTML = '🔊 Озвучити';
+      mainBtn.classList.remove('speaking');
+      mainBtn._speakToken = undefined;
+    }
+  }
+  // OCR speak button
+  const ocrBtn = document.getElementById('speakOcrBtn');
+  if (ocrBtn) {
+    if (TTS.isSpeaking() && ocrBtn._speakToken !== undefined && TTS.isCurrent(ocrBtn._speakToken)) {
+      ocrBtn.innerHTML = '⏹ Зупинити';
+      ocrBtn.classList.add('speaking');
+    } else {
+      ocrBtn.innerHTML = '🔊 Озвучити';
+      ocrBtn.classList.remove('speaking');
+      ocrBtn._speakToken = undefined;
+    }
+  }
+  // Phrase cards
+  document.querySelectorAll('.phrase-card.speaking').forEach(c => {
+    if (!(TTS.isSpeaking() && c._speakToken !== undefined && TTS.isCurrent(c._speakToken))) {
+      c.classList.remove('speaking');
+      c._speakToken = undefined;
+    }
+  });
+  // Saved/history list speak buttons (data-action="speak")
+  document.querySelectorAll('button[data-action="speak"].speaking').forEach(b => {
+    if (!(TTS.isSpeaking() && b._speakToken !== undefined && TTS.isCurrent(b._speakToken))) {
+      b.innerHTML = '🔊 Озвучити';
+      b.classList.remove('speaking');
+      b._speakToken = undefined;
+    }
+  });
+});
+
+// Wrapper: toggle speak/stop for a specific button & content
+async function toggleSpeak(button, text, lang, opts = {}) {
+  if (!button) return;
+  // If this button initiated the current speech → stop it
+  if (button._speakToken !== undefined && TTS.isCurrent(button._speakToken)) {
+    TTS.stop();
+    return;
+  }
+  // Otherwise stop any other speech and start new
+  TTS.stop();
+  if (!text || !text.trim()) {
+    showToast('Немає тексту для озвучення', 'warn');
+    return;
+  }
+  // Mark this button — token will match the next TTS call
+  // We need to assign the token AFTER speak() starts. So we pre-bump and predict:
+  // We'll set token after speak() call begins by reading internal currentToken.
+  // Simpler: pass a flag and have TTS.speak return token via mutating activeCall.
+  // We just call speak() and then read TTS state.
+  const promise = TTS.speak({ text, lang, button });
+  // After speak() begins, activeCall is set synchronously inside speak() (after await loadVoices).
+  // We poll briefly to capture the token.
+  const stamp = Date.now();
+  const grabToken = () => {
+    // Find token by comparing button reference
+    // We rely on TTS internals: activeCall.button matches
+    // Simpler: peek via a getter we expose
+    return TTS._peekToken && TTS._peekToken();
+  };
+  // Wait one microtask cycle then attach
+  await Promise.resolve();
+  // Attach listener that captures token on next change
+  const off = TTS.onChange(() => {
+    // The token is whatever the engine set
+    // We mark this button as the current speaker
+    const tok = TTS._peekToken && TTS._peekToken();
+    if (tok != null) {
+      button._speakToken = tok;
+      // Trigger UI refresh manually since we just mutated the button
+      // (TTS.onChange already fires after notify, so UI is updated)
+    }
+    off();
+  });
+  await promise;
+}
+
+// Expose a token peek so wrappers can identify "the current speech"
+// Must be defined on the singleton — patch it now:
+TTS._peekToken = (function(){
+  // Closure access — read from TTS internals via a getter on the module
+  // Since activeCall is private, expose through onChange. But we already have a way:
+  // Re-define inside the IIFE? Simpler: maintain external mirror.
+  return null; // overridden below
+})();
+
+// Re-implement with a cleaner approach: maintain a public state mirror
+(function attachTokenAccessor(){
+  let lastToken = null;
+  const off = TTS.onChange((active) => {
+    lastToken = active ? active.token : null;
+  });
+  TTS._peekToken = () => lastToken;
+})();
+
+// Convenience: simple speak (used by phrase tap-to-speak — toggles too)
+function quickSpeak(text, lang, hostElement = null) {
+  // For phrase cards: clicking same card while playing stops it
+  if (hostElement && hostElement._speakToken !== undefined && TTS.isCurrent(hostElement._speakToken)) {
+    TTS.stop();
+    return;
+  }
+  TTS.stop();
+  if (!text || !text.trim()) return;
+  if (hostElement) hostElement.classList.add('speaking');
+  const off = TTS.onChange(() => {
+    const tok = TTS._peekToken();
+    if (tok != null && hostElement) hostElement._speakToken = tok;
+    off();
+  });
+  TTS.speak({ text, lang, button: hostElement });
+}
+
+// ============ TRANSLATION PROVIDERS ============
 
 async function translateMyMemory(text, srcLang, tgtLang) {
   const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${srcLang}|${tgtLang}`;
@@ -1143,11 +1486,15 @@ async function performOCR(imageSource, langCode) {
 // ============ UI ============
 
 function switchTab(name) {
+  // Stop any speech when switching tabs (avoid orphaned state)
+  TTS.stop();
   state.activeTab = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('hidden', c.id !== `tab-${name}`));
   if (name === 'phrases') renderPhrases();
   if (name === 'history') renderHistory();
+  if (name === 'saved') renderSaved();
+  if (name === 'translate') updateSaveButton();
   saveState();
 }
 
@@ -1155,16 +1502,22 @@ function renderPhrases() {
   const grid = document.getElementById('phraseGrid');
   const list = PHRASES[state.phraseCat] || [];
   grid.innerHTML = list.map(p => `
-    <div class="phrase-card" data-tr="${p[state.phraseLang].replace(/"/g,'&quot;')}">
+    <div class="phrase-card" data-tr="${(p[state.phraseLang] || '').replace(/"/g,'&quot;')}">
       <div class="uk">${p.uk}</div>
-      <div class="tr">${p[state.phraseLang]}</div>
+      <div class="tr">${p[state.phraseLang] || ''}</div>
     </div>
   `).join('');
   grid.querySelectorAll('.phrase-card').forEach(c => {
     c.onclick = () => {
-      navigator.clipboard?.writeText(c.dataset.tr);
-      showToast('Скопійовано!', 'success');
-      speak(c.dataset.tr, state.phraseLang);
+      const txt = c.dataset.tr;
+      // Copy on first click — but if currently speaking this card, stop instead
+      if (c._speakToken !== undefined && TTS.isCurrent(c._speakToken)) {
+        TTS.stop();
+        return;
+      }
+      navigator.clipboard?.writeText(txt);
+      showToast('Скопійовано! Натисніть ще раз, щоб зупинити', 'success');
+      quickSpeak(txt, state.phraseLang, c);
     };
   });
   document.querySelectorAll('#phraseCategories .tag').forEach(t => {
@@ -1181,7 +1534,7 @@ function renderHistory() {
   list.innerHTML = state.history.map((h, i) => `
     <div class="history-item" data-idx="${i}">
       <div class="history-meta">
-        <span>${h.srcLang.toUpperCase()} → ${h.tgtLang.toUpperCase()} • ${h.context}</span>
+        <span>${h.srcLang.toUpperCase()} → ${h.tgtLang.toUpperCase()} • ${h.context || ''}</span>
         <span>${new Date(h.time).toLocaleString()}</span>
       </div>
       <div class="history-text"><strong>${escapeHtml(h.src)}</strong></div>
@@ -1193,10 +1546,75 @@ function renderHistory() {
       const h = state.history[item.dataset.idx];
       Object.assign(state, {
         srcLang: h.srcLang, tgtLang: h.tgtLang,
-        srcText: h.src, tgtText: h.tgt, context: h.context,
+        srcText: h.src, tgtText: h.tgt, context: h.context || 'general',
       });
       switchTab('translate');
       restoreUI();
+    };
+  });
+}
+
+function renderSaved() {
+  const list = document.getElementById('savedList');
+  if (state.saved.length === 0) {
+    list.innerHTML = '<div class="empty-state">⭐ Немає збережених перекладів<br><br><small>Натисніть «Зберегти» після перекладу, щоб додати сюди</small></div>';
+    return;
+  }
+  list.innerHTML = state.saved.map((s, i) => `
+    <div class="history-item" data-idx="${i}">
+      <div class="history-meta">
+        <span>${s.srcLang.toUpperCase()} → ${s.tgtLang.toUpperCase()}</span>
+        <span>${new Date(s.time).toLocaleString()}</span>
+      </div>
+      <div class="history-text"><strong>${escapeHtml(s.src)}</strong></div>
+      <div class="history-text" style="color:var(--primary)">${escapeHtml(s.tgt)}</div>
+      <div class="item-actions">
+        <button class="btn btn-secondary" data-action="open" data-idx="${i}">📝 Відкрити</button>
+        <button class="btn btn-secondary" data-action="copy" data-idx="${i}">📋 Копіювати</button>
+        <button class="btn btn-secondary" data-action="speak" data-idx="${i}">🔊 Озвучити</button>
+        <button class="btn btn-danger" data-action="del" data-idx="${i}">🗑️ Видалити</button>
+      </div>
+    </div>
+  `).join('');
+  list.querySelectorAll('button[data-action]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      const item = state.saved[idx];
+      if (!item) return;
+      const action = btn.dataset.action;
+      if (action === 'open') {
+        Object.assign(state, {
+          srcLang: item.srcLang, tgtLang: item.tgtLang,
+          srcText: item.src, tgtText: item.tgt,
+        });
+        switchTab('translate');
+        restoreUI();
+      } else if (action === 'copy') {
+        navigator.clipboard?.writeText(item.tgt);
+        showToast('Скопійовано!', 'success');
+      } else if (action === 'speak') {
+        // Toggle: if speaking this item, stop
+        if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
+          TTS.stop();
+          return;
+        }
+        TTS.stop();
+        btn.innerHTML = '⏹ Зупинити';
+        btn.classList.add('speaking');
+        const off = TTS.onChange(() => {
+          const tok = TTS._peekToken();
+          if (tok != null) btn._speakToken = tok;
+          off();
+        });
+        TTS.speak({ text: item.tgt, lang: item.tgtLang, button: btn });
+      } else if (action === 'del') {
+        state.saved.splice(idx, 1);
+        saveState();
+        renderSaved();
+        updateSaveButton();
+        showToast('Видалено', 'success');
+      }
     };
   });
 }
@@ -1205,20 +1623,36 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function speak(text, lang) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  const langMap = { uk: 'uk-UA', en: 'en-US', pl: 'pl-PL', de: 'de-DE' };
-  u.lang = langMap[lang] || 'en-US';
-  speechSynthesis.speak(u);
-}
-
 function showContextNote() {
   const note = document.getElementById('contextNote');
   const hint = CONTEXT_HINTS[state.context];
   if (hint) { note.textContent = hint; note.classList.remove('hidden'); }
   else note.classList.add('hidden');
+}
+
+function isCurrentSaved() {
+  if (!state.tgtText || !state.srcText) return -1;
+  return state.saved.findIndex(s =>
+    s.src === state.srcText &&
+    s.tgt === state.tgtText &&
+    s.srcLang === state.srcLang &&
+    s.tgtLang === state.tgtLang
+  );
+}
+
+function updateSaveButton() {
+  const btn = document.getElementById('saveBtn');
+  if (!btn) return;
+  const idx = isCurrentSaved();
+  if (idx >= 0) {
+    btn.innerHTML = '✓ Збережено';
+    btn.classList.add('saved');
+    btn.title = 'Натисніть, щоб видалити зі збережених';
+  } else {
+    btn.innerHTML = '⭐ Зберегти';
+    btn.classList.remove('saved');
+    btn.title = '';
+  }
 }
 
 async function restoreUI() {
@@ -1233,7 +1667,6 @@ async function restoreUI() {
   document.querySelectorAll('#contextTags .tag').forEach(t => {
     t.classList.toggle('active', t.dataset.ctx === state.context);
   });
-  // Restore image from IndexedDB
   if (state.hasPhoto) {
     try {
       const blob = await idbGet(IDB_PHOTO_KEY);
@@ -1241,17 +1674,16 @@ async function restoreUI() {
         setPreviewFromBlob(blob);
         showPhoto();
       } else {
-        // No image found in IDB — clean state flag
         state.hasPhoto = false;
         saveState();
       }
     } catch (e) {
-      console.error('Failed to load image from IndexedDB', e);
       state.hasPhoto = false;
       saveState();
     }
   }
   showContextNote();
+  updateSaveButton();
   switchTab(state.activeTab);
 }
 
@@ -1298,14 +1730,15 @@ document.querySelectorAll('#phraseCategories .tag').forEach(t => {
 });
 
 document.getElementById('phraseLang').onchange = e => { state.phraseLang = e.target.value; renderPhrases(); saveState(); };
-document.getElementById('srcLang').onchange = e => { state.srcLang = e.target.value; saveState(); };
-document.getElementById('tgtLang').onchange = e => { state.tgtLang = e.target.value; saveState(); };
+document.getElementById('srcLang').onchange = e => { state.srcLang = e.target.value; saveState(); updateSaveButton(); };
+document.getElementById('tgtLang').onchange = e => { state.tgtLang = e.target.value; saveState(); updateSaveButton(); };
 document.getElementById('photoSrcLang').onchange = e => { state.photoSrcLang = e.target.value; saveState(); };
 document.getElementById('photoTgtLang').onchange = e => { state.photoTgtLang = e.target.value; saveState(); };
-document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); };
-document.getElementById('tgtText').oninput = e => { state.tgtText = e.target.value; saveState(); };
+document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); updateSaveButton(); };
+document.getElementById('tgtText').oninput = e => { state.tgtText = e.target.value; saveState(); updateSaveButton(); };
 
 document.getElementById('swapBtn').onclick = () => {
+  TTS.stop();
   [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
   [state.srcText, state.tgtText] = [state.tgtText, state.srcText];
   document.getElementById('srcLang').value = state.srcLang;
@@ -1313,6 +1746,7 @@ document.getElementById('swapBtn').onclick = () => {
   document.getElementById('srcText').value = state.srcText;
   document.getElementById('tgtText').value = state.tgtText;
   saveState();
+  updateSaveButton();
 };
 
 document.getElementById('translateBtn').onclick = async () => {
@@ -1342,6 +1776,7 @@ document.getElementById('translateBtn').onclick = async () => {
     });
     state.history = state.history.slice(0, 100);
     saveState();
+    updateSaveButton();
     
     showToast(`✓ Готово (${provider})`, 'success');
   } catch (err) {
@@ -1353,11 +1788,13 @@ document.getElementById('translateBtn').onclick = async () => {
 };
 
 document.getElementById('clearSrcBtn').onclick = () => {
+  TTS.stop();
   state.srcText = ''; state.tgtText = '';
   document.getElementById('srcText').value = '';
   document.getElementById('tgtText').value = '';
   document.getElementById('providerInfo').classList.add('hidden');
   saveState();
+  updateSaveButton();
 };
 
 document.getElementById('copyBtn').onclick = () => {
@@ -1367,18 +1804,50 @@ document.getElementById('copyBtn').onclick = () => {
   }
 };
 
+// SPEAK button — toggle play/stop
 document.getElementById('speakBtn').onclick = () => {
-  if (state.tgtText) speak(state.tgtText, state.tgtLang);
+  const btn = document.getElementById('speakBtn');
+  // If this button initiated current speech → stop
+  if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
+    TTS.stop();
+    return;
+  }
+  if (!state.tgtText.trim()) {
+    showToast('Немає тексту для озвучення', 'warn');
+    return;
+  }
+  TTS.stop();
+  // Capture token after speech starts
+  const off = TTS.onChange(() => {
+    const tok = TTS._peekToken();
+    if (tok != null) btn._speakToken = tok;
+    off();
+  });
+  TTS.speak({ text: state.tgtText, lang: state.tgtLang, button: btn });
 };
 
+// SAVE button — toggles saved state
 document.getElementById('saveBtn').onclick = () => {
-  if (state.tgtText) {
+  if (!state.srcText.trim() || !state.tgtText.trim()) {
+    showToast('Немає що зберігати', 'error');
+    return;
+  }
+  const idx = isCurrentSaved();
+  if (idx >= 0) {
+    state.saved.splice(idx, 1);
+    saveState();
+    updateSaveButton();
+    showToast('Видалено зі збережених', 'success');
+  } else {
     state.saved.unshift({
       src: state.srcText, tgt: state.tgtText,
-      srcLang: state.srcLang, tgtLang: state.tgtLang, time: Date.now()
+      srcLang: state.srcLang, tgtLang: state.tgtLang,
+      context: state.context, time: Date.now(),
     });
+    state.saved = state.saved.slice(0, 200);
     saveState();
-    showToast('⭐ Збережено', 'success');
+    updateSaveButton();
+    showToast('⭐ Збережено! Дивіться вкладку «Збережені»', 'success');
   }
 };
 
@@ -1387,24 +1856,24 @@ document.getElementById('micBtn').onclick = () => {
     showToast('Голосовий ввід не підтримується', 'error');
     return;
   }
+  TTS.stop(); // don't speak over the user
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const rec = new SR();
-  const langMap = { uk: 'uk-UA', en: 'en-US', pl: 'pl-PL', de: 'de-DE' };
-  rec.lang = langMap[state.srcLang];
+  rec.lang = SPEECH_LANG_MAP[state.srcLang] || 'en-US';
   rec.onresult = e => {
     const text = e.results[0][0].transcript;
     state.srcText = (state.srcText + ' ' + text).trim();
     document.getElementById('srcText').value = state.srcText;
     saveState();
+    updateSaveButton();
   };
   rec.onerror = () => showToast('Помилка розпізнавання', 'error');
   rec.start();
   showToast('🎤 Говоріть...');
 };
 
-// ============ PHOTO INPUT HANDLING ============
+// ============ PHOTO ============
 
-// Shared handler for both file and camera inputs
 async function handlePhotoSelection(file) {
   if (!file) return;
   if (!file.type.startsWith('image/')) {
@@ -1412,7 +1881,6 @@ async function handlePhotoSelection(file) {
     return;
   }
   try {
-    // Store as Blob in IndexedDB (much more efficient than base64)
     await idbPut(IDB_PHOTO_KEY, file);
     state.hasPhoto = true;
     state.ocrResult = '';
@@ -1422,29 +1890,23 @@ async function handlePhotoSelection(file) {
     saveState();
     showToast('✓ Фото завантажено', 'success');
   } catch (e) {
-    console.error(e);
     showToast('❌ Не вдалося зберегти фото', 'error');
   }
 }
 
-// Photo area: click on placeholder triggers file picker (gallery)
-document.getElementById('photoArea').onclick = (e) => {
-  // Only trigger if no image is currently shown (placeholder visible)
+document.getElementById('photoArea').onclick = () => {
   if (!state.hasPhoto) {
     document.getElementById('fileInput').click();
   }
 };
 
-// "Обрати файл" button — opens gallery/file browser (no capture)
 document.getElementById('uploadBtn').onclick = e => {
   e.stopPropagation();
-  // Reset value so same file can be re-selected
   const input = document.getElementById('fileInput');
   input.value = '';
   input.click();
 };
 
-// "Камера" button — directly opens camera (with capture attribute)
 document.getElementById('cameraBtn').onclick = e => {
   e.stopPropagation();
   const input = document.getElementById('cameraInput');
@@ -1452,15 +1914,8 @@ document.getElementById('cameraBtn').onclick = e => {
   input.click();
 };
 
-// File input (gallery)
-document.getElementById('fileInput').onchange = e => {
-  handlePhotoSelection(e.target.files[0]);
-};
-
-// Camera input
-document.getElementById('cameraInput').onchange = e => {
-  handlePhotoSelection(e.target.files[0]);
-};
+document.getElementById('fileInput').onchange = e => handlePhotoSelection(e.target.files[0]);
+document.getElementById('cameraInput').onchange = e => handlePhotoSelection(e.target.files[0]);
 
 document.getElementById('removePhotoBtn').onclick = async e => {
   e.stopPropagation();
@@ -1470,11 +1925,11 @@ document.getElementById('removePhotoBtn').onclick = async e => {
     { danger: true, okLabel: 'Видалити', icon: 'warn' }
   );
   if (!ok) return;
-  try { await idbDelete(IDB_PHOTO_KEY); } catch(err) { console.error(err); }
+  TTS.stop();
+  try { await idbDelete(IDB_PHOTO_KEY); } catch(err) {}
   state.hasPhoto = false;
   state.ocrResult = '';
   document.getElementById('ocrResult').value = '';
-  // Clear file inputs
   document.getElementById('fileInput').value = '';
   document.getElementById('cameraInput').value = '';
   hidePhoto();
@@ -1493,10 +1948,8 @@ document.getElementById('ocrBtn').onclick = async () => {
   btn.innerHTML = '<span class="loader"></span> Ініціалізація...';
   btn.disabled = true;
   try {
-    // Fetch the image Blob from IndexedDB
     const blob = await idbGet(IDB_PHOTO_KEY);
     if (!(blob instanceof Blob)) throw new Error('Зображення не знайдено');
-    // Tesseract accepts Blob directly, but for maximum compatibility convert to data URL
     const imageSource = await blobToDataURL(blob);
     
     const ocrText = await performOCR(imageSource, state.photoSrcLang);
@@ -1538,6 +1991,52 @@ document.getElementById('copyOcrBtn').onclick = () => {
   }
 };
 
+// OCR speak — speaks translation block if available, otherwise recognized text
+document.getElementById('speakOcrBtn').onclick = () => {
+  const btn = document.getElementById('speakOcrBtn');
+  if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
+    TTS.stop();
+    return;
+  }
+  if (!state.ocrResult || !state.ocrResult.trim()) {
+    showToast('Немає тексту для озвучення', 'warn');
+    return;
+  }
+  // Try to extract translation portion (in target language)
+  const result = state.ocrResult;
+  const transMarker = result.indexOf('=== ПЕРЕКЛАД');
+  let textToSpeak, lang;
+  if (transMarker >= 0) {
+    // Speak translation
+    const after = result.substring(transMarker);
+    const lines = after.split('\n');
+    textToSpeak = lines.slice(1).join('\n').replace(/^=+.*$/gm, '').trim();
+    lang = state.photoTgtLang;
+  } else {
+    // Speak recognized text
+    const recognMarker = result.indexOf('=== РОЗПІЗНАНО');
+    if (recognMarker >= 0) {
+      const after = result.substring(recognMarker);
+      const lines = after.split('\n');
+      textToSpeak = lines.slice(1).join('\n').replace(/^=+.*$/gm, '').trim();
+    } else {
+      textToSpeak = result;
+    }
+    lang = state.photoSrcLang;
+  }
+  if (!textToSpeak) {
+    showToast('Немає тексту для озвучення', 'warn');
+    return;
+  }
+  TTS.stop();
+  const off = TTS.onChange(() => {
+    const tok = TTS._peekToken();
+    if (tok != null) btn._speakToken = tok;
+    off();
+  });
+  TTS.speak({ text: textToSpeak, lang, button: btn });
+};
+
 document.getElementById('clearHistBtn').onclick = async () => {
   if (state.history.length === 0) { showToast('Історія вже порожня'); return; }
   const ok = await confirmModal(
@@ -1548,6 +2047,19 @@ document.getElementById('clearHistBtn').onclick = async () => {
   if (!ok) return;
   state.history = []; renderHistory(); saveState();
   showToast('Історію очищено', 'success');
+};
+
+document.getElementById('clearSavedBtn').onclick = async () => {
+  if (state.saved.length === 0) { showToast('Немає збережених'); return; }
+  const ok = await confirmModal(
+    'Очистити збережені?',
+    `<p>Буде видалено <strong>${state.saved.length}</strong> збережених перекладів. Цю дію неможливо скасувати.</p>`,
+    { danger: true, okLabel: 'Очистити', icon: 'warn' }
+  );
+  if (!ok) return;
+  TTS.stop();
+  state.saved = []; renderSaved(); saveState(); updateSaveButton();
+  showToast('Збережені очищено', 'success');
 };
 
 document.getElementById('clearAllBtn').onclick = async () => {
@@ -1564,12 +2076,33 @@ document.getElementById('clearAllBtn').onclick = async () => {
     { danger: true, okLabel: 'Видалити все', icon: 'warn' }
   );
   if (!ok) return;
-  try { await idbClearStore(); } catch(e) { console.error(e); }
+  TTS.stop();
+  try { await idbClearStore(); } catch(e) {}
   localStorage.removeItem(STORE_KEY);
   location.reload();
 };
 
 document.getElementById('infoBtn').onclick = async () => {
+  // Build voice info
+  let voiceInfo = '';
+  try {
+    const vs = await TTS.loadVoices();
+    if (vs && vs.length) {
+      const langs = ['uk', 'en', 'pl', 'de', 'cs'];
+      const found = langs.map(l => {
+        const target = SPEECH_LANG_MAP[l].toLowerCase();
+        const short = target.split('-')[0];
+        const has = vs.find(v => (v.lang||'').toLowerCase() === target ||
+                                  (v.lang||'').toLowerCase().startsWith(short+'-') ||
+                                  (v.lang||'').toLowerCase() === short);
+        return `<li>${l.toUpperCase()}: ${has ? '✅ ' + has.name : '⚠️ не знайдено'}</li>`;
+      }).join('');
+      voiceInfo = `<p><strong>🔊 Голоси озвучення:</strong></p><ul>${found}</ul>`;
+    } else {
+      voiceInfo = '<p class="muted">⚠️ Голоси озвучення недоступні в цьому браузері</p>';
+    }
+  } catch(e) {}
+
   await alertModal(
     'ШвидкоПереклад',
     `<p>Безкоштовний AI-перекладач зі спеціалізацією на офіційних документах, медичних та юридичних термінах.</p>
@@ -1580,13 +2113,13 @@ document.getElementById('infoBtn').onclick = async () => {
        <li>LibreTranslate (резервний)</li>
      </ul>
      <p><strong>📷 OCR:</strong> Tesseract.js у браузері</p>
+     ${voiceInfo}
      <p><strong>🔒 Приватність:</strong> Дані зберігаються локально (LocalStorage + IndexedDB), не передаються на сервери</p>
-     <p><strong>🌍 Мови:</strong> 🇺🇦 🇬🇧 🇵🇱 🇩🇪</p>`,
+     <p><strong>🌍 Мови:</strong> 🇺🇦 🇬🇧 🇵🇱 🇩🇪 🇨🇿</p>`,
     'info'
   );
 };
 
-// Cleanup object URL on unload
 window.addEventListener('beforeunload', () => {
   if (_activeObjectURL) {
     try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
@@ -1599,8 +2132,8 @@ loadUsage();
 restoreUI();
 renderPhrases();
 renderHistory();
+renderSaved();
 
-// Silent rollover check every minute
 setInterval(checkRollover, 60000);
 </script>
 </body>
