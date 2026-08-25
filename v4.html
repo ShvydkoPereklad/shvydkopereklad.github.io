@@ -1388,7 +1388,7 @@ async function limitReachedModal(type) {
     'Денний ліміт досягнуто',
     `<p>${icon} Ви використали всі <strong>${max} ${label}</strong> на сьогодні.</p>
      <p class="muted">Ліміт скидається опівночі. До скидання: <strong>${formatResetTime()}</strong></p>
-     <p class="muted">Обмеження допомагає зберегти штовні API-сервіси доступними для всіх користувачів.</p>`,
+     <p class="muted">Обмеження допомагає зберегти безкоштовні API-сервіси доступними для всіх користувачів.</p>`,
     'warn'
   );
 }
@@ -1555,17 +1555,6 @@ const TTS = (() => {
       try {
         try { window.speechSynthesis.resume(); } catch(e) {}
         window.speechSynthesis.speak(u);
-
-        const keepAlive = setInterval(() => {
-          if (currentToken !== myToken || !window.speechSynthesis.speaking) {
-            clearInterval(keepAlive);
-            return;
-          }
-          try {
-            window.speechSynthesis.pause();
-            window.speechSynthesis.resume();
-          } catch(e) {}
-        }, 10000);
       } catch (err) {
         console.error('TTS speak failed:', err);
         showToast('Помилка озвучення', 'error');
