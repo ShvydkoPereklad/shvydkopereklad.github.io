@@ -300,6 +300,70 @@ header {
 
 .item-actions .btn { padding: 6px 10px; font-size: 11px; min-height: 32px; }
 
+/* Search box */
+.search-bar {
+  display: flex; gap: 8px; align-items: center;
+  margin-bottom: 12px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px; font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus { outline: none; border-color: var(--primary); }
+
+.search-count {
+  font-size: 11px; color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Scan history item with thumbnail */
+.scan-item {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 8px;
+  transition: all 0.2s;
+  display: flex; gap: 12px;
+}
+
+.scan-item:hover { background: #f0f4ff; border-color: var(--primary); }
+
+.scan-thumb {
+  width: 70px; height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: #f3f4f6;
+  cursor: pointer;
+  border: 1px solid var(--border);
+}
+
+.scan-body { flex: 1; min-width: 0; }
+
+.scan-text-preview {
+  font-size: 13px; color: var(--text);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.scan-trans-preview {
+  font-size: 12px; color: var(--primary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .phrase-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -439,6 +503,24 @@ header {
   line-height: 1.7;
 }
 
+.modal-body img {
+  max-width: 100%;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+
+.modal-body pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  font-size: 13px;
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
 .modal-footer {
   padding: 16px 20px 20px;
   display: flex; gap: 8px;
@@ -518,6 +600,8 @@ header {
   .modal-footer .btn { flex: 1; min-width: 0; }
   .modal-title { font-size: 16px; }
   .modal-icon { width: 40px; height: 40px; font-size: 20px; }
+
+  .scan-thumb { width: 56px; height: 56px; }
 }
 
 @media (max-width: 380px) {
@@ -574,6 +658,7 @@ header {
     <button class="tab" data-tab="phrases">💬 Фрази</button>
     <button class="tab" data-tab="saved">⭐ Збережені</button>
     <button class="tab" data-tab="history">📚 Історія</button>
+    <button class="tab" data-tab="scans">🗂️ Сканування</button>
   </div>
 
   <!-- TRANSLATE TAB -->
@@ -721,6 +806,10 @@ header {
         <div class="section-title" style="margin:0">Збережені переклади</div>
         <button class="btn btn-secondary" id="clearSavedBtn">🗑️ Очистити</button>
       </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="savedSearch" placeholder="🔍 Пошук у збережених...">
+        <span class="search-count" id="savedCount"></span>
+      </div>
       <div id="savedList"></div>
     </div>
   </div>
@@ -732,7 +821,26 @@ header {
         <div class="section-title" style="margin:0">Історія</div>
         <button class="btn btn-secondary" id="clearHistBtn">🗑️ Очистити</button>
       </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="historySearch" placeholder="🔍 Пошук в історії...">
+        <span class="search-count" id="historyCount"></span>
+      </div>
       <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- SCANS TAB -->
+  <div class="tab-content hidden" id="tab-scans">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div class="section-title" style="margin:0">Історія сканувань <span class="info-badge">до 100</span></div>
+        <button class="btn btn-secondary" id="clearScansBtn">🗑️ Очистити</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="scanSearch" placeholder="🔍 Пошук у сканах...">
+        <span class="search-count" id="scanCount"></span>
+      </div>
+      <div id="scansList"></div>
     </div>
   </div>
 </div>
@@ -757,30 +865,95 @@ header {
 const STORE_KEY = 'shvydkoperetlad_v3';
 const USAGE_KEY = 'shvydkoperetlad_usage';
 
-/* ============ INDEXEDDB FOR IMAGES ============ */
+/* ============ INDEXEDDB FOR IMAGES + SCAN HISTORY ============ */
 const IDB_NAME = 'shvydkoperetlad_db';
 const IDB_VERSION = 1;
 const IDB_STORE = 'images';
+const IDB_SCANS_STORE = 'scans';
 const IDB_PHOTO_KEY = 'currentPhoto';
+const MAX_SCANS = 100;
 
 let _idbPromise = null;
 function idbOpen() {
   if (_idbPromise) return _idbPromise;
-  _idbPromise = new Promise((resolve, reject) => {
-    if (!('indexedDB' in window)) {
-      reject(new Error('IndexedDB not supported'));
-      return;
+
+  function createStores(db) {
+    if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    if (!db.objectStoreNames.contains(IDB_SCANS_STORE)) {
+      const s = db.createObjectStore(IDB_SCANS_STORE, { keyPath: 'id' });
+      s.createIndex('time', 'time', { unique: false });
     }
-    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(IDB_STORE)) {
-        db.createObjectStore(IDB_STORE);
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  }
+
+  function open() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+      req.onupgradeneeded = e => createStores(e.target.result);
+      req.onerror = () => reject(req.error);
+      req.onsuccess = () => resolve(req.result);
+    });
+  }
+
+  function backupImages(db) {
+    return new Promise((resolve) => {
+      if (!db.objectStoreNames.contains(IDB_STORE)) return resolve([]);
+      try {
+        const tx = db.transaction(IDB_STORE, 'readonly');
+        const store = tx.objectStore(IDB_STORE);
+        const keysReq = store.getAllKeys();
+        const valsReq = store.getAll();
+        let keys = null, vals = null;
+        keysReq.onsuccess = () => { keys = keysReq.result; done(); };
+        valsReq.onsuccess = () => { vals = valsReq.result; done(); };
+        keysReq.onerror = () => resolve([]);
+        valsReq.onerror = () => resolve([]);
+        function done() {
+          if (keys && vals) {
+            resolve(keys.map((k, i) => ({ key: k, value: vals[i] })));
+          }
+        }
+      } catch (e) { resolve([]); }
+    });
+  }
+
+  function restoreImages(db, entries) {
+    return new Promise((resolve, reject) => {
+      if (!entries || entries.length === 0) return resolve();
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      const store = tx.objectStore(IDB_STORE);
+      entries.forEach(({ key, value }) => store.put(value, key));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    });
+  }
+
+  function deleteDB() {
+    return new Promise((resolve, reject) => {
+      const del = indexedDB.deleteDatabase(IDB_NAME);
+      del.onsuccess = () => resolve();
+      del.onerror = () => reject(del.error);
+      del.onblocked = () => resolve();
+    });
+  }
+
+  _idbPromise = (async () => {
+    if (!('indexedDB' in window)) throw new Error('IndexedDB not supported');
+
+    let db = await open();
+
+    // If scans store is missing, migrate while preserving images
+    if (!db.objectStoreNames.contains(IDB_SCANS_STORE)) {
+      const backup = await backupImages(db);
+      db.close();
+      await deleteDB();
+      db = await open();
+      await restoreImages(db, backup);
+    }
+
+    return db;
+  })();
+
   return _idbPromise;
 }
 
@@ -825,12 +998,106 @@ async function idbClearStore() {
   });
 }
 
+/* ---- Scan history store operations ---- */
+async function scanAdd(record) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_SCANS_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_SCANS_STORE);
+    store.put(record);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
+async function scanGetAll() {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_SCANS_STORE, 'readonly');
+    const req = tx.objectStore(IDB_SCANS_STORE).getAll();
+    req.onsuccess = () => {
+      const list = req.result || [];
+      list.sort((a, b) => b.time - a.time);
+      resolve(list);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function scanGet(id) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_SCANS_STORE, 'readonly');
+    const req = tx.objectStore(IDB_SCANS_STORE).get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function scanDelete(id) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_SCANS_STORE, 'readwrite');
+    tx.objectStore(IDB_SCANS_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function scanClear() {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_SCANS_STORE, 'readwrite');
+    tx.objectStore(IDB_SCANS_STORE).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+// Trim scan store to MAX_SCANS newest entries
+async function scanTrim() {
+  const all = await scanGetAll(); // sorted newest-first
+  if (all.length <= MAX_SCANS) return;
+  const toDelete = all.slice(MAX_SCANS);
+  for (const rec of toDelete) {
+    try { await scanDelete(rec.id); } catch(e) {}
+  }
+}
+
 function blobToDataURL(blob) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
     fr.onload = () => resolve(fr.result);
     fr.onerror = () => reject(fr.error);
     fr.readAsDataURL(blob);
+  });
+}
+
+// Create a small thumbnail blob from an image blob/dataURL
+function makeThumbnail(source, maxSize = 160) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      const scale = Math.min(1, maxSize / Math.max(width, height));
+      const w = Math.round(width * scale);
+      const h = Math.round(height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.onerror = () => resolve(null);
+    if (source instanceof Blob) {
+      const url = URL.createObjectURL(source);
+      img.src = url;
+      const orig = img.onload;
+      img.onload = () => { orig(); try { URL.revokeObjectURL(url); } catch(e){} };
+    } else {
+      img.src = source;
+    }
   });
 }
 
@@ -904,11 +1171,62 @@ let state = {
   phraseCat: 'emergency', phraseLang: 'en',
 };
 
+// Search query state (not persisted)
+let searchQueries = { history: '', saved: '', scan: '' };
+// Cached scan list for rendering/search
+let scansCache = [];
+
 let usage = { date: '', translate: 0, scan: 0 };
 
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ============ FRIENDLY DATE FORMATTING ============ */
+function formatFriendlyDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+
+  const timeStr = d.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+
+  // Just now / minutes / hours (within today)
+  if (diffSec < 45) return 'щойно';
+  if (diffMin < 60) return `${diffMin} хв тому`;
+
+  // Same calendar day
+  const isSameDay = d.toDateString() === now.toDateString();
+  if (isSameDay) {
+    if (diffHour < 6) return `${diffHour} год тому`;
+    return `сьогодні о ${timeStr}`;
+  }
+
+  // Yesterday
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  if (d.toDateString() === yesterday.toDateString()) {
+    return `вчора о ${timeStr}`;
+  }
+
+  // Within last 7 days -> weekday name
+  const days = Math.floor(diffMs / 86400000);
+  if (days < 7) {
+    const weekday = d.toLocaleDateString('uk-UA', { weekday: 'long' });
+    return `${weekday} о ${timeStr}`;
+  }
+
+  // Same year -> day month
+  if (d.getFullYear() === now.getFullYear()) {
+    return d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long' }) + ` о ${timeStr}`;
+  }
+
+  // Otherwise full date
+  return d.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function loadState() {
@@ -1082,10 +1400,8 @@ const TTS = (() => {
   let voicesLoaded = false;
   let voicesLoadingPromise = null;
   let currentUtterance = null;
-  let currentToken = 0; // increments on each speak() call
-  // Subscribers notified when speaking state changes (for UI updates)
+  let currentToken = 0;
   const listeners = new Set();
-  // Per-call state: { token, button, pulseEl }
   let activeCall = null;
 
   function loadVoices() {
@@ -1107,7 +1423,6 @@ const TTS = (() => {
 
       if (tryGet()) return;
 
-      // Some browsers fire 'voiceschanged' asynchronously
       const onChanged = () => {
         if (tryGet()) {
           window.speechSynthesis.removeEventListener('voiceschanged', onChanged);
@@ -1115,7 +1430,6 @@ const TTS = (() => {
       };
       window.speechSynthesis.addEventListener('voiceschanged', onChanged);
 
-      // Fallback: poll for up to 3 seconds
       let attempts = 0;
       const intv = setInterval(() => {
         attempts++;
@@ -1123,7 +1437,6 @@ const TTS = (() => {
           clearInterval(intv);
           window.speechSynthesis.removeEventListener('voiceschanged', onChanged);
           if (!voicesLoaded) {
-            // Resolve with whatever we have (may be empty — browser will use default)
             voices = window.speechSynthesis.getVoices() || [];
             voicesLoaded = true;
             resolve(voices);
@@ -1140,15 +1453,12 @@ const TTS = (() => {
     const target = (SPEECH_LANG_MAP[langCode] || langCode || '').toLowerCase();
     const short = target.split('-')[0];
 
-    // Exact match (e.g., uk-UA)
     let v = voices.find(vo => (vo.lang || '').toLowerCase() === target);
     if (v) return v;
-    // Match by primary language (e.g., uk)
     v = voices.find(vo => (vo.lang || '').toLowerCase().startsWith(short + '-'));
     if (v) return v;
     v = voices.find(vo => (vo.lang || '').toLowerCase() === short);
     if (v) return v;
-    // Loose match
     v = voices.find(vo => (vo.lang || '').toLowerCase().includes(short));
     return v || null;
   }
@@ -1168,11 +1478,10 @@ const TTS = (() => {
   function stop() {
     if (!supported) return;
     try {
-      currentToken++; // invalidate any pending calls
+      currentToken++;
       window.speechSynthesis.cancel();
     } catch(e) { console.warn('TTS stop error:', e); }
     if (currentUtterance) {
-      // Detach handlers to avoid late firing
       currentUtterance.onend = null;
       currentUtterance.onerror = null;
       currentUtterance.onstart = null;
@@ -1184,7 +1493,6 @@ const TTS = (() => {
     }
   }
 
-  // speak({ text, lang, button }) returns a promise resolving when finished/cancelled
   async function speak({ text, lang, button = null }) {
     if (!supported) {
       showToast('Озвучення не підтримується вашим браузером', 'error');
@@ -1196,10 +1504,7 @@ const TTS = (() => {
       return false;
     }
 
-    // Always cancel previous speech first
     stop();
-
-    // Wait for voices (with timeout inside loadVoices)
     await loadVoices();
 
     const myToken = ++currentToken;
@@ -1216,7 +1521,6 @@ const TTS = (() => {
     currentUtterance = u;
     notify();
 
-    // Warn if no matching voice (some platforms still play with default)
     if (!voice) {
       console.warn('No TTS voice found for', lang, '— using default. Available:',
         voices.map(v => `${v.name} (${v.lang})`).slice(0, 10));
@@ -1237,7 +1541,6 @@ const TTS = (() => {
 
       u.onend = () => finish(true);
       u.onerror = (e) => {
-        // 'canceled' / 'interrupted' aren't real errors — ignore quietly
         if (e && (e.error === 'canceled' || e.error === 'interrupted')) {
           finish(false);
         } else {
@@ -1250,22 +1553,8 @@ const TTS = (() => {
       };
 
       try {
-        // Chrome quirk: resume in case it's stuck in paused state
         try { window.speechSynthesis.resume(); } catch(e) {}
         window.speechSynthesis.speak(u);
-
-        // Chrome bug workaround: long utterances get cut off after ~15s.
-        // Periodic pause/resume keeps the queue alive.
-        const keepAlive = setInterval(() => {
-          if (currentToken !== myToken || !window.speechSynthesis.speaking) {
-            clearInterval(keepAlive);
-            return;
-          }
-          try {
-            window.speechSynthesis.pause();
-            window.speechSynthesis.resume();
-          } catch(e) {}
-        }, 10000);
       } catch (err) {
         console.error('TTS speak failed:', err);
         showToast('Помилка озвучення', 'error');
@@ -1279,10 +1568,8 @@ const TTS = (() => {
     return () => listeners.delete(fn);
   }
 
-  // Kick off voice loading early
   if (supported) loadVoices();
 
-  // Stop speech when page is hidden / unloaded
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
   });
@@ -1292,9 +1579,7 @@ const TTS = (() => {
   return { supported, speak, stop, isSpeaking, isCurrent, onChange, loadVoices };
 })();
 
-// Update visual state of all "speak" buttons whenever TTS state changes
 TTS.onChange(() => {
-  // Main speak button
   const mainBtn = document.getElementById('speakBtn');
   if (mainBtn) {
     if (TTS.isSpeaking() && mainBtn._speakToken !== undefined && TTS.isCurrent(mainBtn._speakToken)) {
@@ -1306,7 +1591,6 @@ TTS.onChange(() => {
       mainBtn._speakToken = undefined;
     }
   }
-  // OCR speak button
   const ocrBtn = document.getElementById('speakOcrBtn');
   if (ocrBtn) {
     if (TTS.isSpeaking() && ocrBtn._speakToken !== undefined && TTS.isCurrent(ocrBtn._speakToken)) {
@@ -1318,14 +1602,12 @@ TTS.onChange(() => {
       ocrBtn._speakToken = undefined;
     }
   }
-  // Phrase cards
   document.querySelectorAll('.phrase-card.speaking').forEach(c => {
     if (!(TTS.isSpeaking() && c._speakToken !== undefined && TTS.isCurrent(c._speakToken))) {
       c.classList.remove('speaking');
       c._speakToken = undefined;
     }
   });
-  // Saved/history list speak buttons (data-action="speak")
   document.querySelectorAll('button[data-action="speak"].speaking').forEach(b => {
     if (!(TTS.isSpeaking() && b._speakToken !== undefined && TTS.isCurrent(b._speakToken))) {
       b.innerHTML = '🔊 Озвучити';
@@ -1335,73 +1617,7 @@ TTS.onChange(() => {
   });
 });
 
-// Wrapper: toggle speak/stop for a specific button & content
-async function toggleSpeak(button, text, lang, opts = {}) {
-  if (!button) return;
-  // If this button initiated the current speech → stop it
-  if (button._speakToken !== undefined && TTS.isCurrent(button._speakToken)) {
-    TTS.stop();
-    return;
-  }
-  // Otherwise stop any other speech and start new
-  TTS.stop();
-  if (!text || !text.trim()) {
-    showToast('Немає тексту для озвучення', 'warn');
-    return;
-  }
-  // Mark this button — token will match the next TTS call
-  // We need to assign the token AFTER speak() starts. So we pre-bump and predict:
-  // We'll set token after speak() call begins by reading internal currentToken.
-  // Simpler: pass a flag and have TTS.speak return token via mutating activeCall.
-  // We just call speak() and then read TTS state.
-  const promise = TTS.speak({ text, lang, button });
-  // After speak() begins, activeCall is set synchronously inside speak() (after await loadVoices).
-  // We poll briefly to capture the token.
-  const stamp = Date.now();
-  const grabToken = () => {
-    // Find token by comparing button reference
-    // We rely on TTS internals: activeCall.button matches
-    // Simpler: peek via a getter we expose
-    return TTS._peekToken && TTS._peekToken();
-  };
-  // Wait one microtask cycle then attach
-  await Promise.resolve();
-  // Attach listener that captures token on next change
-  const off = TTS.onChange(() => {
-    // The token is whatever the engine set
-    // We mark this button as the current speaker
-    const tok = TTS._peekToken && TTS._peekToken();
-    if (tok != null) {
-      button._speakToken = tok;
-      // Trigger UI refresh manually since we just mutated the button
-      // (TTS.onChange already fires after notify, so UI is updated)
-    }
-    off();
-  });
-  await promise;
-}
-
-// Expose a token peek so wrappers can identify "the current speech"
-// Must be defined on the singleton — patch it now:
-TTS._peekToken = (function(){
-  // Closure access — read from TTS internals via a getter on the module
-  // Since activeCall is private, expose through onChange. But we already have a way:
-  // Re-define inside the IIFE? Simpler: maintain external mirror.
-  return null; // overridden below
-})();
-
-// Re-implement with a cleaner approach: maintain a public state mirror
-(function attachTokenAccessor(){
-  let lastToken = null;
-  const off = TTS.onChange((active) => {
-    lastToken = active ? active.token : null;
-  });
-  TTS._peekToken = () => lastToken;
-})();
-
-// Convenience: simple speak (used by phrase tap-to-speak — toggles too)
 function quickSpeak(text, lang, hostElement = null) {
-  // For phrase cards: clicking same card while playing stops it
   if (hostElement && hostElement._speakToken !== undefined && TTS.isCurrent(hostElement._speakToken)) {
     TTS.stop();
     return;
@@ -1410,11 +1626,32 @@ function quickSpeak(text, lang, hostElement = null) {
   if (!text || !text.trim()) return;
   if (hostElement) hostElement.classList.add('speaking');
   const off = TTS.onChange(() => {
-    const tok = TTS._peekToken();
-    if (tok != null && hostElement) hostElement._speakToken = tok;
     off();
   });
   TTS.speak({ text, lang, button: hostElement });
+  // capture token
+  const off2 = TTS.onChange((active) => {
+    if (active && hostElement) hostElement._speakToken = active.token;
+    off2();
+  });
+}
+
+// Simplified token-capturing speak for list buttons
+function speakWithButton(button, text, lang) {
+  if (button._speakToken !== undefined && TTS.isCurrent(button._speakToken)) {
+    TTS.stop();
+    return;
+  }
+  TTS.stop();
+  if (!text || !text.trim()) {
+    showToast('Немає тексту для озвучення', 'warn');
+    return;
+  }
+  const off = TTS.onChange((active) => {
+    if (active) button._speakToken = active.token;
+    off();
+  });
+  TTS.speak({ text, lang, button });
 }
 
 // ============ TRANSLATION PROVIDERS ============
@@ -1486,7 +1723,6 @@ async function performOCR(imageSource, langCode) {
 // ============ UI ============
 
 function switchTab(name) {
-  // Stop any speech when switching tabs (avoid orphaned state)
   TTS.stop();
   state.activeTab = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
@@ -1494,6 +1730,7 @@ function switchTab(name) {
   if (name === 'phrases') renderPhrases();
   if (name === 'history') renderHistory();
   if (name === 'saved') renderSaved();
+  if (name === 'scans') refreshScans();
   if (name === 'translate') updateSaveButton();
   saveState();
 }
@@ -1510,7 +1747,6 @@ function renderPhrases() {
   grid.querySelectorAll('.phrase-card').forEach(c => {
     c.onclick = () => {
       const txt = c.dataset.tr;
-      // Copy on first click — but if currently speaking this card, stop instead
       if (c._speakToken !== undefined && TTS.isCurrent(c._speakToken)) {
         TTS.stop();
         return;
@@ -1525,20 +1761,58 @@ function renderPhrases() {
   });
 }
 
+// Highlight matched search term
+function highlightMatch(text, query) {
+  const escaped = escapeHtml(text);
+  if (!query) return escaped;
+  const q = query.trim();
+  if (!q) return escaped;
+  try {
+    const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return escaped.replace(re, '<mark style="background:var(--accent);padding:0 2px;border-radius:3px">$1</mark>');
+  } catch(e) {
+    return escaped;
+  }
+}
+
+function matchesQuery(query, ...fields) {
+  if (!query || !query.trim()) return true;
+  const q = query.trim().toLowerCase();
+  return fields.some(f => (f || '').toLowerCase().includes(q));
+}
+
 function renderHistory() {
   const list = document.getElementById('historyList');
+  const q = searchQueries.history;
+  const countEl = document.getElementById('historyCount');
+
   if (state.history.length === 0) {
     list.innerHTML = '<div class="empty-state">📭 Історія порожня</div>';
+    if (countEl) countEl.textContent = '';
     return;
   }
-  list.innerHTML = state.history.map((h, i) => `
+
+  const filtered = state.history
+    .map((h, i) => ({ h, i }))
+    .filter(({ h }) => matchesQuery(q, h.src, h.tgt));
+
+  if (countEl) {
+    countEl.textContent = q ? `${filtered.length} з ${state.history.length}` : `${state.history.length}`;
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">🔍 Нічого не знайдено</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(({ h, i }) => `
     <div class="history-item" data-idx="${i}">
       <div class="history-meta">
         <span>${h.srcLang.toUpperCase()} → ${h.tgtLang.toUpperCase()} • ${h.context || ''}</span>
-        <span>${new Date(h.time).toLocaleString()}</span>
+        <span>${formatFriendlyDate(h.time)}</span>
       </div>
-      <div class="history-text"><strong>${escapeHtml(h.src)}</strong></div>
-      <div class="history-text" style="color:var(--primary)">${escapeHtml(h.tgt)}</div>
+      <div class="history-text"><strong>${highlightMatch(h.src, q)}</strong></div>
+      <div class="history-text" style="color:var(--primary)">${highlightMatch(h.tgt, q)}</div>
     </div>
   `).join('');
   list.querySelectorAll('.history-item').forEach(item => {
@@ -1556,18 +1830,36 @@ function renderHistory() {
 
 function renderSaved() {
   const list = document.getElementById('savedList');
+  const q = searchQueries.saved;
+  const countEl = document.getElementById('savedCount');
+
   if (state.saved.length === 0) {
     list.innerHTML = '<div class="empty-state">⭐ Немає збережених перекладів<br><br><small>Натисніть «Зберегти» після перекладу, щоб додати сюди</small></div>';
+    if (countEl) countEl.textContent = '';
     return;
   }
-  list.innerHTML = state.saved.map((s, i) => `
+
+  const filtered = state.saved
+    .map((s, i) => ({ s, i }))
+    .filter(({ s }) => matchesQuery(q, s.src, s.tgt));
+
+  if (countEl) {
+    countEl.textContent = q ? `${filtered.length} з ${state.saved.length}` : `${state.saved.length}`;
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">🔍 Нічого не знайдено</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(({ s, i }) => `
     <div class="history-item" data-idx="${i}">
       <div class="history-meta">
         <span>${s.srcLang.toUpperCase()} → ${s.tgtLang.toUpperCase()}</span>
-        <span>${new Date(s.time).toLocaleString()}</span>
+        <span>${formatFriendlyDate(s.time)}</span>
       </div>
-      <div class="history-text"><strong>${escapeHtml(s.src)}</strong></div>
-      <div class="history-text" style="color:var(--primary)">${escapeHtml(s.tgt)}</div>
+      <div class="history-text"><strong>${highlightMatch(s.src, q)}</strong></div>
+      <div class="history-text" style="color:var(--primary)">${highlightMatch(s.tgt, q)}</div>
       <div class="item-actions">
         <button class="btn btn-secondary" data-action="open" data-idx="${i}">📝 Відкрити</button>
         <button class="btn btn-secondary" data-action="copy" data-idx="${i}">📋 Копіювати</button>
@@ -1594,20 +1886,7 @@ function renderSaved() {
         navigator.clipboard?.writeText(item.tgt);
         showToast('Скопійовано!', 'success');
       } else if (action === 'speak') {
-        // Toggle: if speaking this item, stop
-        if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
-          TTS.stop();
-          return;
-        }
-        TTS.stop();
-        btn.innerHTML = '⏹ Зупинити';
-        btn.classList.add('speaking');
-        const off = TTS.onChange(() => {
-          const tok = TTS._peekToken();
-          if (tok != null) btn._speakToken = tok;
-          off();
-        });
-        TTS.speak({ text: item.tgt, lang: item.tgtLang, button: btn });
+        speakWithButton(btn, item.tgt, item.tgtLang);
       } else if (action === 'del') {
         state.saved.splice(idx, 1);
         saveState();
@@ -1616,6 +1895,134 @@ function renderSaved() {
         showToast('Видалено', 'success');
       }
     };
+  });
+}
+
+/* ============ SCAN HISTORY RENDERING ============ */
+async function refreshScans() {
+  try {
+    scansCache = await scanGetAll();
+  } catch (e) {
+    scansCache = [];
+  }
+  renderScans();
+}
+
+function renderScans() {
+  const list = document.getElementById('scansList');
+  const q = searchQueries.scan;
+  const countEl = document.getElementById('scanCount');
+
+  if (scansCache.length === 0) {
+    list.innerHTML = '<div class="empty-state">🗂️ Немає збережених сканувань<br><br><small>Розпізнайте текст на вкладці «Фото», щоб додати сюди</small></div>';
+    if (countEl) countEl.textContent = '';
+    return;
+  }
+
+  const filtered = scansCache.filter(s => matchesQuery(q, s.ocrText, s.translation));
+
+  if (countEl) {
+    countEl.textContent = q ? `${filtered.length} з ${scansCache.length}` : `${scansCache.length} / ${MAX_SCANS}`;
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">🔍 Нічого не знайдено</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(s => `
+    <div class="scan-item" data-id="${s.id}">
+      <img class="scan-thumb" src="${s.thumb || ''}" alt="scan" data-action="view" data-id="${s.id}">
+      <div class="scan-body">
+        <div class="history-meta">
+          <span>${(s.srcLang || '').toUpperCase()}${s.tgtLang && s.tgtLang !== s.srcLang ? ' → ' + s.tgtLang.toUpperCase() : ''}</span>
+          <span>${formatFriendlyDate(s.time)}</span>
+        </div>
+        <div class="scan-text-preview">${highlightMatch(s.ocrText || '', q)}</div>
+        ${s.translation ? `<div class="scan-trans-preview">${highlightMatch(s.translation, q)}</div>` : ''}
+        <div class="item-actions">
+          <button class="btn btn-secondary" data-action="view" data-id="${s.id}">👁️ Переглянути</button>
+          <button class="btn btn-secondary" data-action="copy" data-id="${s.id}">📋 Копіювати</button>
+          <button class="btn btn-secondary" data-action="speak" data-id="${s.id}">🔊 Озвучити</button>
+          <button class="btn btn-danger" data-action="del" data-id="${s.id}">🗑️ Видалити</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  list.querySelectorAll('[data-action]').forEach(el => {
+    el.onclick = async (e) => {
+      e.stopPropagation();
+      const id = el.dataset.id;
+      const action = el.dataset.action;
+      const rec = scansCache.find(x => x.id === id);
+      if (!rec) return;
+
+      if (action === 'view') {
+        await viewScan(rec);
+      } else if (action === 'copy') {
+        const full = rec.translation
+          ? `${rec.ocrText}\n\n---\n\n${rec.translation}`
+          : rec.ocrText;
+        navigator.clipboard?.writeText(full || '');
+        showToast('Скопійовано!', 'success');
+      } else if (action === 'speak') {
+        const txt = rec.translation || rec.ocrText;
+        const lang = rec.translation ? rec.tgtLang : rec.srcLang;
+        speakWithButton(el, txt, lang);
+      } else if (action === 'del') {
+        const ok = await confirmModal(
+          'Видалити скан?',
+          '<p>Цей запис сканування буде видалено назавжди.</p>',
+          { danger: true, okLabel: 'Видалити', icon: 'warn' }
+        );
+        if (!ok) return;
+        try { await scanDelete(id); } catch(err) {}
+        await refreshScans();
+        showToast('Видалено', 'success');
+      }
+    };
+  });
+}
+
+async function viewScan(rec) {
+  let imgHtml = '';
+  try {
+    const full = await scanGet(rec.id);
+    if (full && full.image instanceof Blob) {
+      const dataUrl = await blobToDataURL(full.image);
+      imgHtml = `<img src="${dataUrl}" alt="scan">`;
+    } else if (rec.thumb) {
+      imgHtml = `<img src="${rec.thumb}" alt="scan">`;
+    }
+  } catch(e) {
+    if (rec.thumb) imgHtml = `<img src="${rec.thumb}" alt="scan">`;
+  }
+
+  const body = `
+    ${imgHtml}
+    <p class="muted">${formatFriendlyDate(rec.time)} • ${(rec.srcLang || '').toUpperCase()}${rec.tgtLang && rec.tgtLang !== rec.srcLang ? ' → ' + rec.tgtLang.toUpperCase() : ''}</p>
+    <p><strong>Розпізнаний текст:</strong></p>
+    <pre>${escapeHtml(rec.ocrText || '')}</pre>
+    ${rec.translation ? `<p><strong>Переклад${rec.provider ? ' (' + escapeHtml(rec.provider) + ')' : ''}:</strong></p><pre>${escapeHtml(rec.translation)}</pre>` : ''}
+  `;
+
+  await showModal({
+    title: 'Результат сканування',
+    body,
+    icon: 'info',
+    buttons: [
+      { label: 'Копіювати', type: 'secondary', value: 'copy' },
+      { label: 'Закрити', type: 'primary', value: true },
+    ],
+  }).then(val => {
+    if (val === 'copy') {
+      const full = rec.translation
+        ? `${rec.ocrText}\n\n---\n\n${rec.translation}`
+        : rec.ocrText;
+      navigator.clipboard?.writeText(full || '');
+      showToast('Скопійовано!', 'success');
+    }
   });
 }
 
@@ -1737,6 +2144,20 @@ document.getElementById('photoTgtLang').onchange = e => { state.photoTgtLang = e
 document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); updateSaveButton(); };
 document.getElementById('tgtText').oninput = e => { state.tgtText = e.target.value; saveState(); updateSaveButton(); };
 
+// Search inputs
+document.getElementById('historySearch').oninput = e => {
+  searchQueries.history = e.target.value;
+  renderHistory();
+};
+document.getElementById('savedSearch').oninput = e => {
+  searchQueries.saved = e.target.value;
+  renderSaved();
+};
+document.getElementById('scanSearch').oninput = e => {
+  searchQueries.scan = e.target.value;
+  renderScans();
+};
+
 document.getElementById('swapBtn').onclick = () => {
   TTS.stop();
   [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
@@ -1772,15 +2193,14 @@ document.getElementById('translateBtn').onclick = async () => {
     state.history.unshift({
       src: state.srcText, tgt: translation,
       srcLang: state.srcLang, tgtLang: state.tgtLang,
-      context: state.context, provider, time: Date.now(),
+      context: state.context, time: Date.now(),
     });
-    state.history = state.history.slice(0, 100);
+    if (state.history.length > 100) state.history = state.history.slice(0, 100);
     saveState();
     updateSaveButton();
-    
-    showToast(`✓ Готово (${provider})`, 'success');
-  } catch (err) {
-    showToast('❌ ' + err.message, 'error');
+    showToast('Перекладено!', 'success');
+  } catch (e) {
+    showToast(e.message || 'Помилка перекладу', 'error');
   } finally {
     btn.innerHTML = '🔄 Перекласти';
     btn.disabled = false;
@@ -1789,7 +2209,8 @@ document.getElementById('translateBtn').onclick = async () => {
 
 document.getElementById('clearSrcBtn').onclick = () => {
   TTS.stop();
-  state.srcText = ''; state.tgtText = '';
+  state.srcText = '';
+  state.tgtText = '';
   document.getElementById('srcText').value = '';
   document.getElementById('tgtText').value = '';
   document.getElementById('providerInfo').classList.add('hidden');
@@ -1798,186 +2219,250 @@ document.getElementById('clearSrcBtn').onclick = () => {
 };
 
 document.getElementById('copyBtn').onclick = () => {
-  if (state.tgtText) {
-    navigator.clipboard?.writeText(state.tgtText);
-    showToast('Скопійовано!', 'success');
-  }
+  if (!state.tgtText.trim()) { showToast('Немає тексту для копіювання', 'warn'); return; }
+  navigator.clipboard?.writeText(state.tgtText);
+  showToast('Скопійовано!', 'success');
 };
 
-// SPEAK button — toggle play/stop
 document.getElementById('speakBtn').onclick = () => {
   const btn = document.getElementById('speakBtn');
-  // If this button initiated current speech → stop
   if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
     TTS.stop();
     return;
   }
-  if (!state.tgtText.trim()) {
-    showToast('Немає тексту для озвучення', 'warn');
-    return;
-  }
-  TTS.stop();
-  // Capture token after speech starts
-  const off = TTS.onChange(() => {
-    const tok = TTS._peekToken();
-    if (tok != null) btn._speakToken = tok;
+  if (!state.tgtText.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
+  const off = TTS.onChange((active) => {
+    if (active) btn._speakToken = active.token;
     off();
   });
   TTS.speak({ text: state.tgtText, lang: state.tgtLang, button: btn });
 };
 
-// SAVE button — toggles saved state
 document.getElementById('saveBtn').onclick = () => {
   if (!state.srcText.trim() || !state.tgtText.trim()) {
-    showToast('Немає що зберігати', 'error');
+    showToast('Спочатку зробіть переклад', 'warn');
     return;
   }
   const idx = isCurrentSaved();
   if (idx >= 0) {
+    // Toggle off — remove from saved
     state.saved.splice(idx, 1);
     saveState();
     updateSaveButton();
     showToast('Видалено зі збережених', 'success');
-  } else {
-    state.saved.unshift({
-      src: state.srcText, tgt: state.tgtText,
-      srcLang: state.srcLang, tgtLang: state.tgtLang,
-      context: state.context, time: Date.now(),
-    });
-    state.saved = state.saved.slice(0, 200);
-    saveState();
-    updateSaveButton();
-    showToast('⭐ Збережено! Дивіться вкладку «Збережені»', 'success');
-  }
-};
-
-document.getElementById('micBtn').onclick = () => {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showToast('Голосовий ввід не підтримується', 'error');
+    if (state.activeTab === 'saved') renderSaved();
     return;
   }
-  TTS.stop(); // don't speak over the user
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const rec = new SR();
-  rec.lang = SPEECH_LANG_MAP[state.srcLang] || 'en-US';
-  rec.onresult = e => {
-    const text = e.results[0][0].transcript;
-    state.srcText = (state.srcText + ' ' + text).trim();
-    document.getElementById('srcText').value = state.srcText;
-    saveState();
-    updateSaveButton();
+  state.saved.unshift({
+    src: state.srcText, tgt: state.tgtText,
+    srcLang: state.srcLang, tgtLang: state.tgtLang,
+    time: Date.now(),
+  });
+  if (state.saved.length > 200) state.saved = state.saved.slice(0, 200);
+  saveState();
+  updateSaveButton();
+  showToast('Збережено! ⭐', 'success');
+};
+
+// ============ VOICE INPUT (Speech Recognition) ============
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognition) {
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onresult = (event) => {
+    let finalTranscript = '';
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) finalTranscript += transcript;
+      else interim += transcript;
+    }
+    if (finalTranscript) {
+      state.srcText = (state.srcText ? state.srcText + ' ' : '') + finalTranscript;
+      document.getElementById('srcText').value = state.srcText;
+      saveState();
+      updateSaveButton();
+    } else if (interim) {
+      document.getElementById('srcText').value = state.srcText + (state.srcText ? ' ' : '') + interim;
+    }
   };
-  rec.onerror = () => showToast('Помилка розпізнавання', 'error');
-  rec.start();
-  showToast('🎤 Говоріть...');
-};
 
-// ============ PHOTO ============
+  recognition.onerror = (event) => {
+    stopListening();
+    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+      showToast('Доступ до мікрофона заборонено', 'error');
+    } else if (event.error === 'no-speech') {
+      showToast('Мовлення не виявлено', 'warn');
+    } else {
+      showToast('Помилка розпізнавання: ' + event.error, 'error');
+    }
+  };
 
-async function handlePhotoSelection(file) {
-  if (!file) return;
-  if (!file.type.startsWith('image/')) {
-    showToast('❌ Оберіть файл зображення', 'error');
-    return;
-  }
+  recognition.onend = () => stopListening();
+}
+
+function startListening() {
+  if (!recognition) return;
   try {
-    await idbPut(IDB_PHOTO_KEY, file);
-    state.hasPhoto = true;
-    state.ocrResult = '';
-    document.getElementById('ocrResult').value = '';
-    setPreviewFromBlob(file);
-    showPhoto();
-    saveState();
-    showToast('✓ Фото завантажено', 'success');
+    recognition.lang = SPEECH_LANG_MAP[state.srcLang] || 'uk-UA';
+    recognition.start();
+    isListening = true;
+    const btn = document.getElementById('micBtn');
+    btn.innerHTML = '⏹ Стоп';
+    btn.classList.add('speaking');
+    showToast('Говоріть...', 'success');
   } catch (e) {
-    showToast('❌ Не вдалося зберегти фото', 'error');
+    console.warn('Recognition start error:', e);
   }
 }
 
-document.getElementById('photoArea').onclick = () => {
-  if (!state.hasPhoto) {
+function stopListening() {
+  isListening = false;
+  const btn = document.getElementById('micBtn');
+  if (btn) {
+    btn.innerHTML = '🎤 Голос';
+    btn.classList.remove('speaking');
+  }
+  try { recognition && recognition.stop(); } catch(e) {}
+}
+
+document.getElementById('micBtn').onclick = () => {
+  if (!SpeechRecognition) {
+    showToast('Голосове введення не підтримується вашим браузером', 'error');
+    return;
+  }
+  if (isListening) stopListening();
+  else startListening();
+};
+
+// ============ PHOTO / OCR ============
+async function handleImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showToast('Оберіть зображення', 'error');
+    return;
+  }
+  try {
+    // Store the original blob in IndexedDB
+    await idbPut(IDB_PHOTO_KEY, file);
+    setPreviewFromBlob(file);
+    state.hasPhoto = true;
+    state.ocrResult = '';
+    document.getElementById('ocrResult').value = '';
+    saveState();
+    showPhoto();
+  } catch (e) {
+    console.error(e);
+    showToast('Не вдалося завантажити зображення', 'error');
+  }
+}
+
+document.getElementById('uploadBtn').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('cameraBtn').onclick = () => document.getElementById('cameraInput').click();
+
+document.getElementById('fileInput').onchange = e => {
+  if (e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
+  e.target.value = '';
+};
+document.getElementById('cameraInput').onchange = e => {
+  if (e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
+  e.target.value = '';
+};
+
+document.getElementById('photoArea').onclick = (e) => {
+  if (!state.hasPhoto && e.target.closest('#photoPlaceholder')) {
     document.getElementById('fileInput').click();
   }
 };
 
-document.getElementById('uploadBtn').onclick = e => {
-  e.stopPropagation();
-  const input = document.getElementById('fileInput');
-  input.value = '';
-  input.click();
-};
-
-document.getElementById('cameraBtn').onclick = e => {
-  e.stopPropagation();
-  const input = document.getElementById('cameraInput');
-  input.value = '';
-  input.click();
-};
-
-document.getElementById('fileInput').onchange = e => handlePhotoSelection(e.target.files[0]);
-document.getElementById('cameraInput').onchange = e => handlePhotoSelection(e.target.files[0]);
-
-document.getElementById('removePhotoBtn').onclick = async e => {
-  e.stopPropagation();
-  const ok = await confirmModal(
-    'Видалити фото?',
-    '<p>Фото та розпізнаний текст буде видалено.</p>',
-    { danger: true, okLabel: 'Видалити', icon: 'warn' }
-  );
-  if (!ok) return;
-  TTS.stop();
-  try { await idbDelete(IDB_PHOTO_KEY); } catch(err) {}
+document.getElementById('removePhotoBtn').onclick = async () => {
+  try { await idbDelete(IDB_PHOTO_KEY); } catch(e) {}
   state.hasPhoto = false;
   state.ocrResult = '';
   document.getElementById('ocrResult').value = '';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('cameraInput').value = '';
-  hidePhoto();
   saveState();
+  hidePhoto();
 };
 
 document.getElementById('ocrBtn').onclick = async () => {
   if (!state.hasPhoto) { showToast('Спочатку додайте фото', 'error'); return; }
-  
+
   if (!canUse('scan')) {
     await limitReachedModal('scan');
     return;
   }
-  
+
   const btn = document.getElementById('ocrBtn');
-  btn.innerHTML = '<span class="loader"></span> Ініціалізація...';
   btn.disabled = true;
+  let blob = null;
   try {
-    const blob = await idbGet(IDB_PHOTO_KEY);
+    blob = await idbGet(IDB_PHOTO_KEY);
     if (!(blob instanceof Blob)) throw new Error('Зображення не знайдено');
-    const imageSource = await blobToDataURL(blob);
-    
-    const ocrText = await performOCR(imageSource, state.photoSrcLang);
-    if (!ocrText.trim()) throw new Error('Текст не знайдено на зображенні');
-    
+
+    // OCR
+    const text = await performOCR(blob, state.photoSrcLang);
     incrementUsage('scan');
-    
-    btn.innerHTML = '<span class="loader"></span> Переклад...';
-    let translation = '', provider = '';
+
+    const cleanText = (text || '').trim();
+    if (!cleanText) {
+      document.getElementById('ocrResult').value = '';
+      state.ocrResult = '';
+      saveState();
+      showToast('Текст не розпізнано', 'warn');
+      btn.innerHTML = '🔍 Розпізнати і перекласти';
+      btn.disabled = false;
+      return;
+    }
+
+    let translation = '';
+    let provider = '';
+    // Translate if languages differ
     if (state.photoSrcLang !== state.photoTgtLang) {
-      if (canUse('translate')) {
-        try {
-          const r = await translate(ocrText, state.photoSrcLang, state.photoTgtLang);
-          translation = r.translation; provider = r.provider;
-          incrementUsage('translate');
-        } catch (e) { translation = '(Помилка: ' + e.message + ')'; }
-      } else {
-        translation = '(Ліміт перекладів вичерпано — показано лише розпізнаний текст)';
+      btn.innerHTML = '<span class="loader"></span> Переклад...';
+      try {
+        const res = await translate(cleanText, state.photoSrcLang, state.photoTgtLang);
+        translation = res.translation;
+        provider = res.provider;
+      } catch (e) {
+        showToast('OCR готово, але переклад не вдався', 'warn');
       }
     }
-    const result = `=== РОЗПІЗНАНО (${state.photoSrcLang.toUpperCase()}) ===\n\n${ocrText}\n\n${translation ? `=== ПЕРЕКЛАД (${state.photoTgtLang.toUpperCase()}) • ${provider} ===\n\n${translation}` : ''}`;
-    state.ocrResult = result;
-    document.getElementById('ocrResult').value = result;
+
+    const combined = translation
+      ? `📄 РОЗПІЗНАНО:\n${cleanText}\n\n🔄 ПЕРЕКЛАД:\n${translation}`
+      : cleanText;
+    document.getElementById('ocrResult').value = combined;
+    state.ocrResult = combined;
     saveState();
-    
-    showToast('✓ Готово', 'success');
-  } catch (err) {
-    showToast('❌ ' + err.message, 'error');
+
+    // Save to scan history
+    try {
+      const thumb = await makeThumbnail(blob, 160);
+      const record = {
+        id: 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        time: Date.now(),
+        image: blob,
+        thumb: thumb,
+        ocrText: cleanText,
+        translation: translation,
+        provider: provider,
+        srcLang: state.photoSrcLang,
+        tgtLang: state.photoTgtLang,
+      };
+      await scanAdd(record);
+      await scanTrim();
+    } catch (e) {
+      console.warn('Scan save failed:', e);
+    }
+
+    showToast('Готово!', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast(e.message || 'Помилка розпізнавання', 'error');
   } finally {
     btn.innerHTML = '🔍 Розпізнати і перекласти';
     btn.disabled = false;
@@ -1985,103 +2470,113 @@ document.getElementById('ocrBtn').onclick = async () => {
 };
 
 document.getElementById('copyOcrBtn').onclick = () => {
-  if (state.ocrResult) {
-    navigator.clipboard?.writeText(state.ocrResult);
-    showToast('Скопійовано!', 'success');
-  }
+  if (!state.ocrResult.trim()) { showToast('Немає тексту для копіювання', 'warn'); return; }
+  navigator.clipboard?.writeText(state.ocrResult);
+  showToast('Скопійовано!', 'success');
 };
 
-// OCR speak — speaks translation block if available, otherwise recognized text
 document.getElementById('speakOcrBtn').onclick = () => {
   const btn = document.getElementById('speakOcrBtn');
   if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
     TTS.stop();
     return;
   }
-  if (!state.ocrResult || !state.ocrResult.trim()) {
-    showToast('Немає тексту для озвучення', 'warn');
-    return;
-  }
-  // Try to extract translation portion (in target language)
-  const result = state.ocrResult;
-  const transMarker = result.indexOf('=== ПЕРЕКЛАД');
-  let textToSpeak, lang;
-  if (transMarker >= 0) {
-    // Speak translation
-    const after = result.substring(transMarker);
-    const lines = after.split('\n');
-    textToSpeak = lines.slice(1).join('\n').replace(/^=+.*$/gm, '').trim();
-    lang = state.photoTgtLang;
-  } else {
-    // Speak recognized text
-    const recognMarker = result.indexOf('=== РОЗПІЗНАНО');
-    if (recognMarker >= 0) {
-      const after = result.substring(recognMarker);
-      const lines = after.split('\n');
-      textToSpeak = lines.slice(1).join('\n').replace(/^=+.*$/gm, '').trim();
-    } else {
-      textToSpeak = result;
-    }
-    lang = state.photoSrcLang;
-  }
-  if (!textToSpeak) {
-    showToast('Немає тексту для озвучення', 'warn');
-    return;
-  }
-  TTS.stop();
-  const off = TTS.onChange(() => {
-    const tok = TTS._peekToken();
-    if (tok != null) btn._speakToken = tok;
+  if (!state.ocrResult.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
+  // Speak translated part if available, else the recognized text
+  const off = TTS.onChange((active) => {
+    if (active) btn._speakToken = active.token;
     off();
   });
-  TTS.speak({ text: textToSpeak, lang, button: btn });
+  // Prefer target language if translation was done
+  const lang = state.photoSrcLang !== state.photoTgtLang ? state.photoTgtLang : state.photoSrcLang;
+  TTS.speak({ text: state.ocrResult, lang, button: btn });
 };
 
+// ============ CLEAR BUTTONS ============
 document.getElementById('clearHistBtn').onclick = async () => {
-  if (state.history.length === 0) { showToast('Історія вже порожня'); return; }
+  if (state.history.length === 0) { showToast('Історія вже порожня', 'warn'); return; }
   const ok = await confirmModal(
     'Очистити історію?',
-    `<p>Буде видалено <strong>${state.history.length}</strong> записів. Цю дію неможливо скасувати.</p>`,
+    '<p>Уся історія перекладів буде видалена назавжди.</p>',
     { danger: true, okLabel: 'Очистити', icon: 'warn' }
   );
   if (!ok) return;
-  state.history = []; renderHistory(); saveState();
+  state.history = [];
+  saveState();
+  renderHistory();
   showToast('Історію очищено', 'success');
 };
 
 document.getElementById('clearSavedBtn').onclick = async () => {
-  if (state.saved.length === 0) { showToast('Немає збережених'); return; }
+  if (state.saved.length === 0) { showToast('Немає збережених', 'warn'); return; }
   const ok = await confirmModal(
     'Очистити збережені?',
-    `<p>Буде видалено <strong>${state.saved.length}</strong> збережених перекладів. Цю дію неможливо скасувати.</p>`,
+    '<p>Усі збережені переклади буде видалено назавжди.</p>',
     { danger: true, okLabel: 'Очистити', icon: 'warn' }
   );
   if (!ok) return;
-  TTS.stop();
-  state.saved = []; renderSaved(); saveState(); updateSaveButton();
+  state.saved = [];
+  saveState();
+  renderSaved();
+  updateSaveButton();
   showToast('Збережені очищено', 'success');
+};
+
+document.getElementById('clearScansBtn').onclick = async () => {
+  if (scansCache.length === 0) { showToast('Немає сканувань', 'warn'); return; }
+  const ok = await confirmModal(
+    'Очистити сканування?',
+    '<p>Уся історія сканувань та збережені зображення будуть видалені назавжди.</p>',
+    { danger: true, okLabel: 'Очистити', icon: 'warn' }
+  );
+  if (!ok) return;
+  try { await scanClear(); } catch(e) {}
+  await refreshScans();
+  showToast('Сканування очищено', 'success');
 };
 
 document.getElementById('clearAllBtn').onclick = async () => {
   const ok = await confirmModal(
     'Видалити всі дані?',
-    `<p>Буде видалено:</p>
+    `<p>Це видалить <strong>усе</strong>:</p>
      <ul>
        <li>Історію перекладів</li>
        <li>Збережені переклади</li>
-       <li>Завантажене фото</li>
-       <li>Налаштування</li>
+       <li>Історію сканувань та зображення</li>
+       <li>Поточне фото</li>
      </ul>
      <p class="muted">Цю дію неможливо скасувати.</p>`,
     { danger: true, okLabel: 'Видалити все', icon: 'warn' }
   );
   if (!ok) return;
+
   TTS.stop();
+  state.history = [];
+  state.saved = [];
+  state.srcText = '';
+  state.tgtText = '';
+  state.ocrResult = '';
+  state.hasPhoto = false;
+  saveState();
+
   try { await idbClearStore(); } catch(e) {}
-  localStorage.removeItem(STORE_KEY);
-  location.reload();
+  try { await scanClear(); } catch(e) {}
+
+  hidePhoto();
+  document.getElementById('srcText').value = '';
+  document.getElementById('tgtText').value = '';
+  document.getElementById('ocrResult').value = '';
+  document.getElementById('providerInfo').classList.add('hidden');
+  scansCache = [];
+
+  renderHistory();
+  renderSaved();
+  renderScans();
+  updateSaveButton();
+  showToast('Усі дані видалено', 'success');
 };
 
+// ============ INFO MODAL ============
 document.getElementById('infoBtn').onclick = async () => {
   // Build voice info
   let voiceInfo = '';
@@ -2120,21 +2615,10 @@ document.getElementById('infoBtn').onclick = async () => {
   );
 };
 
-window.addEventListener('beforeunload', () => {
-  if (_activeObjectURL) {
-    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
-  }
-});
-
-// Init
+// ============ INIT ============
 loadState();
 loadUsage();
 restoreUI();
-renderPhrases();
-renderHistory();
-renderSaved();
-
-setInterval(checkRollover, 60000);
 </script>
 </body>
 </html>
