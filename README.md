@@ -9,6 +9,9 @@
 - 🌐 **Free translation** — no API keys, no registration, no signup
 - 🎯 **Context-aware** — specialized modes for legal, medical, official documents, education, and banking
 - 📷 **Photo OCR** — recognize and translate text from document photos directly in your browser
+- 🗂️ **Scan history** — every OCR scan is automatically saved with a thumbnail (up to 100 entries)
+- 🔍 **Search everywhere** — instantly find any translation across History, Saved & Scans with highlighted matches
+- 🕐 **Human-friendly dates** — relative timestamps like "щойно", "5 хв тому", "вчора о 14:30"
 - 🎤 **Voice input** — speak instead of typing
 - 🔊 **Smart text-to-speech** — listen to translations with one-click stop toggle
 - 💬 **Phrasebook** — curated useful phrases for emergencies, medicine, documents, housing, and work
@@ -29,7 +32,13 @@
 If one provider fails or is unavailable, the next one automatically takes over — you always get a translation.
 
 ### OCR (Optical Character Recognition)
-Powered by [Tesseract.js](https://tesseract.projectnaptha.com/) — runs entirely in your browser using WebAssembly. Images never leave your device.
+Powered by [Tesseract.js](https://tesseract.projectnaptha.com/) — runs entirely in your browser using WebAssembly. Images never leave your device. Every successful scan is automatically archived to your scan history with a generated thumbnail, recognized text, and translation.
+
+### Scan History
+- Each OCR scan is stored in **IndexedDB** with the full-resolution image, a lightweight thumbnail, recognized text, and translation
+- Automatically keeps your **100 newest scans** (older ones are trimmed)
+- Full-screen viewer to review the original image alongside text and translation
+- Per-scan actions: View, Copy, Speak, Delete
 
 ### Text-to-Speech
 Built on the Web Speech API with robust handling of browser quirks:
@@ -55,6 +64,14 @@ Built on the Web Speech API with robust handling of browser quirks:
 3. Select source and target languages
 4. Click **🔍 Розпізнати і перекласти**
 5. Listen to the result with the speak button
+6. Your scan is automatically saved to the **🗂️ Сканування** tab
+
+### Scan History
+1. Go to the **🗂️ Сканування** tab
+2. Browse thumbnails of all your past scans
+3. Search by recognized text or translation
+4. Tap a thumbnail to open the full viewer
+5. View, copy, speak, or delete any scan individually
 
 ### Phrasebook
 1. Go to the **💬 Фрази** tab
@@ -65,14 +82,15 @@ Built on the Web Speech API with robust handling of browser quirks:
 ### Saved Translations
 1. After translating, click **⭐ Зберегти**
 2. Visit the **⭐ Збережені** tab to review
-3. Open, copy, speak, or delete saved items individually
+3. Search, open, copy, speak, or delete saved items individually
 
 ## 🛠️ Tech Stack
 
 - Pure HTML, CSS, and JavaScript — no build step, no framework
 - [Tesseract.js v5](https://github.com/naptha/tesseract.js) for in-browser OCR
 - Web Speech API for voice input and text-to-speech
-- IndexedDB for image storage
+- **IndexedDB (v2)** for image storage and scan history — with a dedicated time-indexed `scans` object store
+- Canvas-based thumbnail generation (160px JPEG @ 70% quality)
 - LocalStorage for settings, history, and saved translations
 - Custom modal system (no native browser dialogs)
 - Progressive Web App ready
@@ -82,9 +100,10 @@ Built on the Web Speech API with robust handling of browser quirks:
 - ✅ No analytics tracking your translations
 - ✅ No user accounts or registration
 - ✅ Photos are processed locally with Tesseract.js
+- ✅ Scanned images and thumbnails are stored only in your browser's IndexedDB
 - ✅ History and saved items live only in your browser
 - ✅ Translation API calls send only the text being translated
-- ✅ One-click "Clear all data" button removes everything instantly
+- ✅ Granular clearing — wipe History, Saved, or Scans independently, or one-click "Clear all data" to remove everything instantly
 
 ## 🎨 Design
 
@@ -99,6 +118,7 @@ The visual identity draws inspiration from Ukrainian symbols — the blue and ye
 - 💼 Job applications, CVs, and interview preparation
 - 🎓 School enrollment forms and educational materials
 - 🏦 Banking documents and financial paperwork
+- 📷 Scanning and archiving printed documents for later reference
 - 🆘 Emergency communication when you don't speak the local language
 
 ## 🤝 Contributing
