@@ -393,6 +393,18 @@ header {
 .phrase-card .uk { font-weight: 700; color: var(--primary); margin-bottom: 4px; font-size: 14px; }
 .phrase-card .tr { font-size: 13px; color: var(--text); }
 
+/* Inline SVG flags */
+.flag-icon {
+  display: inline-block;
+  width: 20px; height: 14px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 4px;
+  box-shadow: 0 0 1px rgba(0,0,0,0.3);
+}
+.lang-select .flag-icon { display: none; }
+.opt-flag { width: 20px; height: 14px; vertical-align: middle; margin-right: 6px; }
+
 .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
 
 .loader {
@@ -647,6 +659,9 @@ header {
         <div class="api-dot"></div>
         <span>100% Free</span>
       </div>
+      <button class="icon-btn" id="backupBtn" title="Зберегти дані в архів">💾</button>
+      <button class="icon-btn" id="restoreBtn" title="Відновити дані з архіву">📥</button>
+      <input type="file" id="restoreInput" accept=".zip" style="display:none">
       <button class="icon-btn" id="infoBtn" title="About">ℹ️</button>
       <button class="icon-btn" id="clearAllBtn" title="Clear data">🗑️</button>
     </div>
@@ -678,21 +693,9 @@ header {
     <div class="main-grid">
       <div class="card">
         <div class="lang-bar">
-          <select class="lang-select" id="srcLang">
-            <option value="uk">🇺🇦 Українська</option>
-            <option value="en">🇬🇧 English</option>
-            <option value="pl">🇵🇱 Polski</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="cs">🇨🇿 Čeština</option>
-          </select>
+          <select class="lang-select" id="srcLang"></select>
           <button class="swap-btn" id="swapBtn">⇄</button>
-          <select class="lang-select" id="tgtLang">
-            <option value="en">🇬🇧 English</option>
-            <option value="uk">🇺🇦 Українська</option>
-            <option value="pl">🇵🇱 Polski</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="cs">🇨🇿 Čeština</option>
-          </select>
+          <select class="lang-select" id="tgtLang"></select>
         </div>
         <textarea class="text-area" id="srcText" placeholder="Введіть текст для перекладу..."></textarea>
         <div class="toolbar">
@@ -756,13 +759,7 @@ header {
             <option value="de">🇩🇪 З німецької</option>
             <option value="cs">🇨🇿 З чеської</option>
           </select>
-          <select class="lang-select" id="photoTgtLang">
-            <option value="uk">🇺🇦 Українською</option>
-            <option value="en">🇬🇧 English</option>
-            <option value="pl">🇵🇱 Polski</option>
-            <option value="de">🇩🇪 Deutsch</option>
-            <option value="cs">🇨🇿 Čeština</option>
-          </select>
+          <select class="lang-select" id="photoTgtLang"></select>
         </div>
         <div class="toolbar" style="margin-top:0;margin-bottom:10px">
           <button class="btn btn-primary btn-full" id="ocrBtn">🔍 Розпізнати і перекласти</button>
@@ -788,12 +785,7 @@ header {
         <div class="tag" data-cat="work">💼 Робота</div>
       </div>
       <div class="lang-bar" style="margin-top:12px">
-        <select class="lang-select" id="phraseLang">
-          <option value="en">🇬🇧 English</option>
-          <option value="pl">🇵🇱 Polski</option>
-          <option value="de">🇩🇪 Deutsch</option>
-          <option value="cs">🇨🇿 Čeština</option>
-        </select>
+        <select class="lang-select" id="phraseLang"></select>
       </div>
       <div class="phrase-grid" id="phraseGrid"></div>
     </div>
@@ -860,10 +852,45 @@ header {
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 
 <script>
 const STORE_KEY = 'shvydkoperetlad_v3';
 const USAGE_KEY = 'shvydkoperetlad_usage';
+
+/* ============ SVG FLAGS ============ */
+const FLAG_SVGS = {
+  uk: `<svg class="opt-flag" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="7" fill="#0057b7"/><rect y="7" width="20" height="7" fill="#ffd700"/></svg>`,
+  en: `<svg class="opt-flag" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="14" fill="#012169"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2.8"/><path d="M0,0 L20,14 M20,0 L0,14" stroke="#c8102e" stroke-width="1.4"/><path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="4.6"/><path d="M10,0 V14 M0,7 H20" stroke="#c8102e" stroke-width="2.8"/></svg>`,
+  pl: `<svg class="opt-flag" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="7" fill="#dc143c"/></svg>`,
+  de: `<svg class="opt-flag" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="4.67" fill="#000"/><rect y="4.67" width="20" height="4.67" fill="#dd0000"/><rect y="9.33" width="20" height="4.67" fill="#ffce00"/></svg>`,
+  cs: `<svg class="opt-flag" viewBox="0 0 20 14" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="7" fill="#fff"/><rect y="7" width="20" height="7" fill="#d7141a"/><path d="M0,0 L10,7 L0,14 Z" fill="#11457e"/></svg>`,
+};
+
+const LANG_LABELS = {
+  translate: {
+    uk: 'Українська', en: 'English', pl: 'Polski', de: 'Deutsch', cs: 'Čeština',
+  },
+  photoSrc: {
+    uk: 'З української', en: 'З англійської', pl: 'З польської', de: 'З німецької', cs: 'З чеської',
+  },
+};
+
+// Populate a native select. Native <option> can't render SVG,
+// so we use flag glyph fallback text with the SVG shown alongside via label.
+function buildLangSelect(selectId, langs, labelMap) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  sel.innerHTML = langs.map(l => {
+    const label = labelMap[l] || l.toUpperCase();
+    return `<option value="${l}">${label}</option>`;
+  }).join('');
+}
+
+// Render inline SVG flag helper (for lists / previews)
+function flagSvg(langCode) {
+  return FLAG_SVGS[langCode] || '';
+}
 
 /* ============ INDEXEDDB FOR IMAGES + SCAN HISTORY ============ */
 const IDB_NAME = 'shvydkoperetlad_db';
@@ -876,84 +903,25 @@ const MAX_SCANS = 100;
 let _idbPromise = null;
 function idbOpen() {
   if (_idbPromise) return _idbPromise;
-
-  function createStores(db) {
-    if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
-    if (!db.objectStoreNames.contains(IDB_SCANS_STORE)) {
-      const s = db.createObjectStore(IDB_SCANS_STORE, { keyPath: 'id' });
-      s.createIndex('time', 'time', { unique: false });
+  _idbPromise = new Promise((resolve, reject) => {
+    if (!('indexedDB' in window)) {
+      reject(new Error('IndexedDB not supported'));
+      return;
     }
-  }
-
-  function open() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-      req.onupgradeneeded = e => createStores(e.target.result);
-      req.onerror = () => reject(req.error);
-      req.onsuccess = () => resolve(req.result);
-    });
-  }
-
-  function backupImages(db) {
-    return new Promise((resolve) => {
-      if (!db.objectStoreNames.contains(IDB_STORE)) return resolve([]);
-      try {
-        const tx = db.transaction(IDB_STORE, 'readonly');
-        const store = tx.objectStore(IDB_STORE);
-        const keysReq = store.getAllKeys();
-        const valsReq = store.getAll();
-        let keys = null, vals = null;
-        keysReq.onsuccess = () => { keys = keysReq.result; done(); };
-        valsReq.onsuccess = () => { vals = valsReq.result; done(); };
-        keysReq.onerror = () => resolve([]);
-        valsReq.onerror = () => resolve([]);
-        function done() {
-          if (keys && vals) {
-            resolve(keys.map((k, i) => ({ key: k, value: vals[i] })));
-          }
-        }
-      } catch (e) { resolve([]); }
-    });
-  }
-
-  function restoreImages(db, entries) {
-    return new Promise((resolve, reject) => {
-      if (!entries || entries.length === 0) return resolve();
-      const tx = db.transaction(IDB_STORE, 'readwrite');
-      const store = tx.objectStore(IDB_STORE);
-      entries.forEach(({ key, value }) => store.put(value, key));
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
-  }
-
-  function deleteDB() {
-    return new Promise((resolve, reject) => {
-      const del = indexedDB.deleteDatabase(IDB_NAME);
-      del.onsuccess = () => resolve();
-      del.onerror = () => reject(del.error);
-      del.onblocked = () => resolve();
-    });
-  }
-
-  _idbPromise = (async () => {
-    if (!('indexedDB' in window)) throw new Error('IndexedDB not supported');
-
-    let db = await open();
-
-    // If scans store is missing, migrate while preserving images
-    if (!db.objectStoreNames.contains(IDB_SCANS_STORE)) {
-      const backup = await backupImages(db);
-      db.close();
-      await deleteDB();
-      db = await open();
-      await restoreImages(db, backup);
-    }
-
-    return db;
-  })();
-
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+      if (!db.objectStoreNames.contains(IDB_SCANS_STORE)) {
+        const scanStore = db.createObjectStore(IDB_SCANS_STORE, { keyPath: 'id' });
+        scanStore.createIndex('time', 'time', { unique: false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
   return _idbPromise;
 }
 
@@ -1393,6 +1361,216 @@ async function limitReachedModal(type) {
   );
 }
 
+/* ============ BACKUP / RESTORE (ZIP ARCHIVE) ============ */
+// Archive name template: shvydkopereklad_YYMMDDHHMM
+function buildArchiveName() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const yy = pad(d.getFullYear() % 100);
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  return `shvydkopereklad_${yy}${mm}${dd}${hh}${mi}`;
+}
+
+async function backupToZip() {
+  if (typeof JSZip === 'undefined') {
+    showToast('Бібліотека архівації недоступна', 'error');
+    return;
+  }
+  const btn = document.getElementById('backupBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="loader"></span>';
+  btn.disabled = true;
+
+  try {
+    const zip = new JSZip();
+
+    // 1) App state (localStorage)
+    const stateData = { photoData: undefined, ...state };
+    delete stateData.photoData;
+    zip.file('state.json', JSON.stringify(stateData, null, 2));
+    zip.file('usage.json', JSON.stringify(usage, null, 2));
+
+    // 2) Current photo (image store)
+    let currentPhoto = null;
+    try { currentPhoto = await idbGet(IDB_PHOTO_KEY); } catch(e) {}
+    const imagesFolder = zip.folder('images');
+    if (currentPhoto instanceof Blob) {
+      const dataUrl = await blobToDataURL(currentPhoto);
+      imagesFolder.file('currentPhoto.txt', dataUrl);
+    }
+
+    // 3) Scans (with images)
+    const allScans = await scanGetAll();
+    const scansFolder = zip.folder('scans');
+    const scanMeta = [];
+    for (const rec of allScans) {
+      const meta = {
+        id: rec.id,
+        time: rec.time,
+        thumb: rec.thumb || null,
+        ocrText: rec.ocrText || '',
+        translation: rec.translation || '',
+        provider: rec.provider || '',
+        srcLang: rec.srcLang || '',
+        tgtLang: rec.tgtLang || '',
+        imageFile: null,
+      };
+      if (rec.image instanceof Blob) {
+        const dataUrl = await blobToDataURL(rec.image);
+        const fileName = rec.id + '.txt';
+        scansFolder.file(fileName, dataUrl);
+        meta.imageFile = 'scans/' + fileName;
+      }
+      scanMeta.push(meta);
+    }
+    zip.file('scans.json', JSON.stringify(scanMeta, null, 2));
+
+    // Manifest
+    zip.file('manifest.json', JSON.stringify({
+      app: 'ШвидкоПереклад',
+      version: 3,
+      exportedAt: new Date().toISOString(),
+    }, null, 2));
+
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const fileName = buildArchiveName() + '.zip';
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => { try { URL.revokeObjectURL(url); } catch(e) {} }, 1000);
+
+    showToast('Архів збережено: ' + fileName, 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Помилка створення архіву', 'error');
+  } finally {
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+  }
+}
+
+async function dataUrlToBlob(dataUrl) {
+  const resp = await fetch(dataUrl);
+  return await resp.blob();
+}
+
+async function restoreFromZip(file) {
+  if (typeof JSZip === 'undefined') {
+    showToast('Бібліотека архівації недоступна', 'error');
+    return;
+  }
+  const ok = await confirmModal(
+    'Відновити з архіву?',
+    `<p>Поточні дані будуть <strong>замінені</strong> вмістом архіву:</p>
+     <ul>
+       <li>Історія та збережені переклади</li>
+       <li>Історія сканувань та зображення</li>
+       <li>Поточне фото та налаштування</li>
+     </ul>
+     <p class="muted">Ця дія незворотна.</p>`,
+    { danger: true, okLabel: 'Відновити', icon: 'warn' }
+  );
+  if (!ok) return;
+
+  const btn = document.getElementById('restoreBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="loader"></span>';
+  btn.disabled = true;
+
+  try {
+    const zip = await JSZip.loadAsync(file);
+
+    // 1) State
+    const stateFile = zip.file('state.json');
+    if (stateFile) {
+      const stateStr = await stateFile.async('string');
+      const parsed = JSON.parse(stateStr);
+      if ('photoData' in parsed) delete parsed.photoData;
+      state = { ...state, ...parsed };
+      if (!Array.isArray(state.saved)) state.saved = [];
+      if (!Array.isArray(state.history)) state.history = [];
+      saveState();
+    }
+
+    // 2) Usage (optional)
+    const usageFile = zip.file('usage.json');
+    if (usageFile) {
+      try {
+        const u = JSON.parse(await usageFile.async('string'));
+        usage = { ...usage, ...u };
+        saveUsage();
+      } catch(e) {}
+    }
+
+    // 3) Current photo
+    await idbClearStore();
+    const photoFile = zip.file('images/currentPhoto.txt');
+    if (photoFile) {
+      const dataUrl = await photoFile.async('string');
+      const blob = await dataUrlToBlob(dataUrl);
+      await idbPut(IDB_PHOTO_KEY, blob);
+      state.hasPhoto = true;
+    } else {
+      state.hasPhoto = false;
+    }
+    saveState();
+
+    // 4) Scans
+    await scanClear();
+    const scansFile = zip.file('scans.json');
+    if (scansFile) {
+      const scanMeta = JSON.parse(await scansFile.async('string'));
+      for (const meta of scanMeta) {
+        let imageBlob = null;
+        if (meta.imageFile) {
+          const imgFile = zip.file(meta.imageFile);
+          if (imgFile) {
+            const dataUrl = await imgFile.async('string');
+            imageBlob = await dataUrlToBlob(dataUrl);
+          }
+        }
+        const record = {
+          id: meta.id,
+          time: meta.time,
+          image: imageBlob,
+          thumb: meta.thumb,
+          ocrText: meta.ocrText,
+          translation: meta.translation,
+          provider: meta.provider,
+          srcLang: meta.srcLang,
+          tgtLang: meta.tgtLang,
+        };
+        try { await scanAdd(record); } catch(e) {}
+      }
+      await scanTrim();
+    }
+
+    // Refresh UI
+    await refreshScans();
+    await restoreUI();
+    renderHistory();
+    renderSaved();
+    renderScans();
+    updateSaveButton();
+
+    showToast('Дані відновлено з архіву', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Помилка відновлення архіву', 'error');
+  } finally {
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+  }
+}
+
 /* ============ TEXT-TO-SPEECH ENGINE ============ */
 const TTS = (() => {
   const supported = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
@@ -1740,8 +1918,8 @@ function renderPhrases() {
   const list = PHRASES[state.phraseCat] || [];
   grid.innerHTML = list.map(p => `
     <div class="phrase-card" data-tr="${(p[state.phraseLang] || '').replace(/"/g,'&quot;')}">
-      <div class="uk">${p.uk}</div>
-      <div class="tr">${p[state.phraseLang] || ''}</div>
+      <div class="uk">${flagSvg('uk')} ${p.uk}</div>
+      <div class="tr">${flagSvg(state.phraseLang)} ${p[state.phraseLang] || ''}</div>
     </div>
   `).join('');
   grid.querySelectorAll('.phrase-card').forEach(c => {
@@ -1808,7 +1986,7 @@ function renderHistory() {
   list.innerHTML = filtered.map(({ h, i }) => `
     <div class="history-item" data-idx="${i}">
       <div class="history-meta">
-        <span>${h.srcLang.toUpperCase()} → ${h.tgtLang.toUpperCase()} • ${h.context || ''}</span>
+        <span>${flagSvg(h.srcLang)} → ${flagSvg(h.tgtLang)} • ${h.context || ''}</span>
         <span>${formatFriendlyDate(h.time)}</span>
       </div>
       <div class="history-text"><strong>${highlightMatch(h.src, q)}</strong></div>
@@ -1855,7 +2033,7 @@ function renderSaved() {
   list.innerHTML = filtered.map(({ s, i }) => `
     <div class="history-item" data-idx="${i}">
       <div class="history-meta">
-        <span>${s.srcLang.toUpperCase()} → ${s.tgtLang.toUpperCase()}</span>
+        <span>${flagSvg(s.srcLang)} → ${flagSvg(s.tgtLang)}</span>
         <span>${formatFriendlyDate(s.time)}</span>
       </div>
       <div class="history-text"><strong>${highlightMatch(s.src, q)}</strong></div>
@@ -1935,7 +2113,7 @@ function renderScans() {
       <img class="scan-thumb" src="${s.thumb || ''}" alt="scan" data-action="view" data-id="${s.id}">
       <div class="scan-body">
         <div class="history-meta">
-          <span>${(s.srcLang || '').toUpperCase()}${s.tgtLang && s.tgtLang !== s.srcLang ? ' → ' + s.tgtLang.toUpperCase() : ''}</span>
+          <span>${flagSvg(s.srcLang)}${s.tgtLang && s.tgtLang !== s.srcLang ? ' → ' + flagSvg(s.tgtLang) : ''}</span>
           <span>${formatFriendlyDate(s.time)}</span>
         </div>
         <div class="scan-text-preview">${highlightMatch(s.ocrText || '', q)}</div>
@@ -1955,91 +2133,76 @@ function renderScans() {
       e.stopPropagation();
       const id = el.dataset.id;
       const action = el.dataset.action;
-      const rec = scansCache.find(x => x.id === id);
+      const rec = scansCache.find(s => s.id === id);
       if (!rec) return;
 
       if (action === 'view') {
         await viewScan(rec);
       } else if (action === 'copy') {
-        const full = rec.translation
-          ? `${rec.ocrText}\n\n---\n\n${rec.translation}`
-          : rec.ocrText;
-        navigator.clipboard?.writeText(full || '');
+        const txt = rec.translation || rec.ocrText || '';
+        navigator.clipboard?.writeText(txt);
         showToast('Скопійовано!', 'success');
       } else if (action === 'speak') {
-        const txt = rec.translation || rec.ocrText;
+        const txt = rec.translation || rec.ocrText || '';
         const lang = rec.translation ? rec.tgtLang : rec.srcLang;
         speakWithButton(el, txt, lang);
       } else if (action === 'del') {
         const ok = await confirmModal(
-          'Видалити скан?',
-          '<p>Цей запис сканування буде видалено назавжди.</p>',
+          'Видалити сканування?',
+          '<p>Це зображення та розпізнаний текст будуть видалені.</p>',
           { danger: true, okLabel: 'Видалити', icon: 'warn' }
         );
-        if (!ok) return;
-        try { await scanDelete(id); } catch(err) {}
-        await refreshScans();
-        showToast('Видалено', 'success');
+        if (ok) {
+          try {
+            await scanDelete(id);
+            await refreshScans();
+            showToast('Видалено', 'success');
+          } catch (err) {
+            showToast('Помилка видалення', 'error');
+          }
+        }
       }
     };
   });
 }
 
+// View a scan in a modal with full image + text
 async function viewScan(rec) {
-  let imgHtml = '';
-  try {
-    const full = await scanGet(rec.id);
-    if (full && full.image instanceof Blob) {
-      const dataUrl = await blobToDataURL(full.image);
-      imgHtml = `<img src="${dataUrl}" alt="scan">`;
-    } else if (rec.thumb) {
-      imgHtml = `<img src="${rec.thumb}" alt="scan">`;
-    }
-  } catch(e) {
-    if (rec.thumb) imgHtml = `<img src="${rec.thumb}" alt="scan">`;
+  let imgUrl = rec.thumb || '';
+  if (rec.image instanceof Blob) {
+    imgUrl = URL.createObjectURL(rec.image);
   }
-
   const body = `
-    ${imgHtml}
-    <p class="muted">${formatFriendlyDate(rec.time)} • ${(rec.srcLang || '').toUpperCase()}${rec.tgtLang && rec.tgtLang !== rec.srcLang ? ' → ' + rec.tgtLang.toUpperCase() : ''}</p>
-    <p><strong>Розпізнаний текст:</strong></p>
+    <img src="${imgUrl}" alt="scan" style="max-width:100%;border-radius:10px;margin-bottom:10px">
+    <div class="section-title">Розпізнаний текст ${flagSvg(rec.srcLang)}</div>
     <pre>${escapeHtml(rec.ocrText || '')}</pre>
-    ${rec.translation ? `<p><strong>Переклад${rec.provider ? ' (' + escapeHtml(rec.provider) + ')' : ''}:</strong></p><pre>${escapeHtml(rec.translation)}</pre>` : ''}
+    ${rec.translation ? `
+      <div class="section-title" style="margin-top:10px">Переклад ${flagSvg(rec.tgtLang)}</div>
+      <pre style="color:var(--primary)">${escapeHtml(rec.translation)}</pre>
+    ` : ''}
+    ${rec.provider ? `<p class="muted">Провайдер: ${escapeHtml(rec.provider)}</p>` : ''}
+    <p class="muted">${formatFriendlyDate(rec.time)}</p>
   `;
-
   await showModal({
-    title: 'Результат сканування',
+    title: 'Перегляд сканування',
     body,
     icon: 'info',
-    buttons: [
-      { label: 'Копіювати', type: 'secondary', value: 'copy' },
-      { label: 'Закрити', type: 'primary', value: true },
-    ],
-  }).then(val => {
-    if (val === 'copy') {
-      const full = rec.translation
-        ? `${rec.ocrText}\n\n---\n\n${rec.translation}`
-        : rec.ocrText;
-      navigator.clipboard?.writeText(full || '');
-      showToast('Скопійовано!', 'success');
-    }
+    buttons: [{ label: 'Закрити', type: 'primary', value: true }],
   });
+  if (rec.image instanceof Blob && imgUrl.startsWith('blob:')) {
+    try { URL.revokeObjectURL(imgUrl); } catch(e) {}
+  }
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
 }
 
-function showContextNote() {
-  const note = document.getElementById('contextNote');
-  const hint = CONTEXT_HINTS[state.context];
-  if (hint) { note.textContent = hint; note.classList.remove('hidden'); }
-  else note.classList.add('hidden');
-}
-
+// ============ SAVE BUTTON STATE ============
 function isCurrentSaved() {
-  if (!state.tgtText || !state.srcText) return -1;
-  return state.saved.findIndex(s =>
+  return state.saved.some(s =>
     s.src === state.srcText &&
     s.tgt === state.tgtText &&
     s.srcLang === state.srcLang &&
@@ -2050,534 +2213,319 @@ function isCurrentSaved() {
 function updateSaveButton() {
   const btn = document.getElementById('saveBtn');
   if (!btn) return;
-  const idx = isCurrentSaved();
-  if (idx >= 0) {
-    btn.innerHTML = '✓ Збережено';
+  if (state.srcText && state.tgtText && isCurrentSaved()) {
     btn.classList.add('saved');
-    btn.title = 'Натисніть, щоб видалити зі збережених';
+    btn.innerHTML = '✅ Збережено';
   } else {
-    btn.innerHTML = '⭐ Зберегти';
     btn.classList.remove('saved');
-    btn.title = '';
+    btn.innerHTML = '⭐ Зберегти';
   }
 }
 
+// ============ LANGUAGE SELECT SETUP ============
+function initLangSelects() {
+  const mainLangs = ['uk', 'en', 'pl', 'de', 'cs'];
+  buildLangSelect('srcLang', mainLangs, LANG_LABELS.translate);
+  buildLangSelect('tgtLang', mainLangs, LANG_LABELS.translate);
+  buildLangSelect('photoTgtLang', mainLangs, LANG_LABELS.translate);
+  buildLangSelect('phraseLang', mainLangs.filter(l => l !== 'uk'), LANG_LABELS.translate);
+}
+
+// ============ RESTORE UI FROM STATE ============
 async function restoreUI() {
   document.getElementById('srcLang').value = state.srcLang;
   document.getElementById('tgtLang').value = state.tgtLang;
-  document.getElementById('srcText').value = state.srcText;
-  document.getElementById('tgtText').value = state.tgtText;
-  document.getElementById('photoSrcLang').value = state.photoSrcLang;
+  document.getElementById('srcText').value = state.srcText || '';
+  document.getElementById('tgtText').value = state.tgtText || '';
   document.getElementById('photoTgtLang').value = state.photoTgtLang;
+  document.getElementById('photoSrcLang').value = state.photoSrcLang;
   document.getElementById('phraseLang').value = state.phraseLang;
-  document.getElementById('ocrResult').value = state.ocrResult;
+
+  // Context tags
   document.querySelectorAll('#contextTags .tag').forEach(t => {
     t.classList.toggle('active', t.dataset.ctx === state.context);
   });
+  updateContextNote();
+
+  // Restore photo from IndexedDB
   if (state.hasPhoto) {
     try {
       const blob = await idbGet(IDB_PHOTO_KEY);
       if (blob instanceof Blob) {
         setPreviewFromBlob(blob);
-        showPhoto();
+        document.getElementById('photoPlaceholder').classList.add('hidden');
+        document.getElementById('photoPreview').classList.remove('hidden');
+        document.getElementById('photoArea').classList.add('has-image');
+        document.getElementById('removePhotoBtn').classList.remove('hidden');
       } else {
         state.hasPhoto = false;
-        saveState();
       }
     } catch (e) {
       state.hasPhoto = false;
-      saveState();
     }
   }
-  showContextNote();
+
+  if (state.ocrResult) {
+    document.getElementById('ocrResult').value = state.ocrResult;
+  }
+
   updateSaveButton();
-  switchTab(state.activeTab);
 }
 
-function showPhoto() {
-  document.getElementById('photoPreview').classList.remove('hidden');
-  document.getElementById('photoPlaceholder').classList.add('hidden');
-  document.getElementById('removePhotoBtn').classList.remove('hidden');
-  document.getElementById('photoArea').classList.add('has-image');
-}
-
-function hidePhoto() {
-  document.getElementById('photoPreview').classList.add('hidden');
-  document.getElementById('photoPlaceholder').classList.remove('hidden');
-  document.getElementById('removePhotoBtn').classList.add('hidden');
-  document.getElementById('photoArea').classList.remove('has-image');
-  document.getElementById('photoPreview').removeAttribute('src');
-  if (_activeObjectURL) {
-    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
-    _activeObjectURL = null;
+function updateContextNote() {
+  const note = document.getElementById('contextNote');
+  const hint = CONTEXT_HINTS[state.context];
+  if (hint) {
+    note.textContent = hint;
+    note.classList.remove('hidden');
+  } else {
+    note.classList.add('hidden');
   }
 }
 
-// Events
-document.querySelectorAll('.tab').forEach(t => {
-  t.onclick = () => switchTab(t.dataset.tab);
-});
-
-document.querySelectorAll('#contextTags .tag').forEach(t => {
-  t.onclick = () => {
-    state.context = t.dataset.ctx;
-    document.querySelectorAll('#contextTags .tag').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    showContextNote();
-    saveState();
-  };
-});
-
-document.querySelectorAll('#phraseCategories .tag').forEach(t => {
-  t.onclick = () => {
-    state.phraseCat = t.dataset.cat;
-    renderPhrases();
-    saveState();
-  };
-});
-
-document.getElementById('phraseLang').onchange = e => { state.phraseLang = e.target.value; renderPhrases(); saveState(); };
-document.getElementById('srcLang').onchange = e => { state.srcLang = e.target.value; saveState(); updateSaveButton(); };
-document.getElementById('tgtLang').onchange = e => { state.tgtLang = e.target.value; saveState(); updateSaveButton(); };
-document.getElementById('photoSrcLang').onchange = e => { state.photoSrcLang = e.target.value; saveState(); };
-document.getElementById('photoTgtLang').onchange = e => { state.photoTgtLang = e.target.value; saveState(); };
-document.getElementById('srcText').oninput = e => { state.srcText = e.target.value; saveState(); updateSaveButton(); };
-document.getElementById('tgtText').oninput = e => { state.tgtText = e.target.value; saveState(); updateSaveButton(); };
-
-// Search inputs
-document.getElementById('historySearch').oninput = e => {
-  searchQueries.history = e.target.value;
-  renderHistory();
-};
-document.getElementById('savedSearch').oninput = e => {
-  searchQueries.saved = e.target.value;
-  renderSaved();
-};
-document.getElementById('scanSearch').oninput = e => {
-  searchQueries.scan = e.target.value;
-  renderScans();
-};
-
-document.getElementById('swapBtn').onclick = () => {
-  TTS.stop();
-  [state.srcLang, state.tgtLang] = [state.tgtLang, state.srcLang];
-  [state.srcText, state.tgtText] = [state.tgtText, state.srcText];
-  document.getElementById('srcLang').value = state.srcLang;
-  document.getElementById('tgtLang').value = state.tgtLang;
-  document.getElementById('srcText').value = state.srcText;
-  document.getElementById('tgtText').value = state.tgtText;
-  saveState();
-  updateSaveButton();
-};
-
-document.getElementById('translateBtn').onclick = async () => {
-  if (!state.srcText.trim()) { showToast('Введіть текст для перекладу', 'error'); return; }
-  
+// ============ MAIN TRANSLATE ACTION ============
+async function doTranslate() {
+  const text = document.getElementById('srcText').value.trim();
+  if (!text) {
+    showToast('Введіть текст для перекладу', 'warn');
+    return;
+  }
   if (!canUse('translate')) {
     await limitReachedModal('translate');
     return;
   }
-  
+
   const btn = document.getElementById('translateBtn');
-  btn.innerHTML = '<span class="loader"></span> Перекладаю...';
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span class="loader"></span> Переклад...';
   btn.disabled = true;
+
+  state.srcText = text;
+  state.srcLang = document.getElementById('srcLang').value;
+  state.tgtLang = document.getElementById('tgtLang').value;
+
   try {
-    const { translation, provider } = await translate(state.srcText, state.srcLang, state.tgtLang);
-    
-    incrementUsage('translate');
-    
+    const { translation, provider } = await translate(text, state.srcLang, state.tgtLang);
     state.tgtText = translation;
     document.getElementById('tgtText').value = translation;
-    document.getElementById('providerBadge').textContent = provider;
-    document.getElementById('providerInfo').classList.remove('hidden');
+
+    // Provider badge
+    const provInfo = document.getElementById('providerInfo');
+    const provBadge = document.getElementById('providerBadge');
+    provBadge.textContent = provider;
+    provInfo.classList.remove('hidden');
+
+    incrementUsage('translate');
+
+    // Add to history
     state.history.unshift({
-      src: state.srcText, tgt: translation,
+      src: text, tgt: translation,
       srcLang: state.srcLang, tgtLang: state.tgtLang,
       context: state.context, time: Date.now(),
+      provider,
     });
-    if (state.history.length > 100) state.history = state.history.slice(0, 100);
+    if (state.history.length > 200) state.history = state.history.slice(0, 200);
+
     saveState();
     updateSaveButton();
     showToast('Перекладено!', 'success');
   } catch (e) {
-    showToast(e.message || 'Помилка перекладу', 'error');
+    console.error(e);
+    await alertModal('Помилка перекладу', `<p>${escapeHtml(e.message)}</p>`, 'warn');
   } finally {
-    btn.innerHTML = '🔄 Перекласти';
+    btn.innerHTML = orig;
     btn.disabled = false;
   }
-};
-
-document.getElementById('clearSrcBtn').onclick = () => {
-  TTS.stop();
-  state.srcText = '';
-  state.tgtText = '';
-  document.getElementById('srcText').value = '';
-  document.getElementById('tgtText').value = '';
-  document.getElementById('providerInfo').classList.add('hidden');
-  saveState();
-  updateSaveButton();
-};
-
-document.getElementById('copyBtn').onclick = () => {
-  if (!state.tgtText.trim()) { showToast('Немає тексту для копіювання', 'warn'); return; }
-  navigator.clipboard?.writeText(state.tgtText);
-  showToast('Скопійовано!', 'success');
-};
-
-document.getElementById('speakBtn').onclick = () => {
-  const btn = document.getElementById('speakBtn');
-  if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
-    TTS.stop();
-    return;
-  }
-  if (!state.tgtText.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
-  const off = TTS.onChange((active) => {
-    if (active) btn._speakToken = active.token;
-    off();
-  });
-  TTS.speak({ text: state.tgtText, lang: state.tgtLang, button: btn });
-};
-
-document.getElementById('saveBtn').onclick = () => {
-  if (!state.srcText.trim() || !state.tgtText.trim()) {
-    showToast('Спочатку зробіть переклад', 'warn');
-    return;
-  }
-  const idx = isCurrentSaved();
-  if (idx >= 0) {
-    // Toggle off — remove from saved
-    state.saved.splice(idx, 1);
-    saveState();
-    updateSaveButton();
-    showToast('Видалено зі збережених', 'success');
-    if (state.activeTab === 'saved') renderSaved();
-    return;
-  }
-  state.saved.unshift({
-    src: state.srcText, tgt: state.tgtText,
-    srcLang: state.srcLang, tgtLang: state.tgtLang,
-    time: Date.now(),
-  });
-  if (state.saved.length > 200) state.saved = state.saved.slice(0, 200);
-  saveState();
-  updateSaveButton();
-  showToast('Збережено! ⭐', 'success');
-};
-
-// ============ VOICE INPUT (Speech Recognition) ============
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let isListening = false;
-
-if (SpeechRecognition) {
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-
-  recognition.onresult = (event) => {
-    let finalTranscript = '';
-    let interim = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) finalTranscript += transcript;
-      else interim += transcript;
-    }
-    if (finalTranscript) {
-      state.srcText = (state.srcText ? state.srcText + ' ' : '') + finalTranscript;
-      document.getElementById('srcText').value = state.srcText;
-      saveState();
-      updateSaveButton();
-    } else if (interim) {
-      document.getElementById('srcText').value = state.srcText + (state.srcText ? ' ' : '') + interim;
-    }
-  };
-
-  recognition.onerror = (event) => {
-    stopListening();
-    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-      showToast('Доступ до мікрофона заборонено', 'error');
-    } else if (event.error === 'no-speech') {
-      showToast('Мовлення не виявлено', 'warn');
-    } else {
-      showToast('Помилка розпізнавання: ' + event.error, 'error');
-    }
-  };
-
-  recognition.onend = () => stopListening();
 }
 
-function startListening() {
-  if (!recognition) return;
-  try {
-    recognition.lang = SPEECH_LANG_MAP[state.srcLang] || 'uk-UA';
-    recognition.start();
-    isListening = true;
-    const btn = document.getElementById('micBtn');
-    btn.innerHTML = '⏹ Стоп';
-    btn.classList.add('speaking');
-    showToast('Говоріть...', 'success');
-  } catch (e) {
-    console.warn('Recognition start error:', e);
-  }
-}
-
-function stopListening() {
-  isListening = false;
-  const btn = document.getElementById('micBtn');
-  if (btn) {
-    btn.innerHTML = '🎤 Голос';
-    btn.classList.remove('speaking');
-  }
-  try { recognition && recognition.stop(); } catch(e) {}
-}
-
-document.getElementById('micBtn').onclick = () => {
-  if (!SpeechRecognition) {
-    showToast('Голосове введення не підтримується вашим браузером', 'error');
+// ============ OCR ACTION ============
+async function doOCR() {
+  if (!state.hasPhoto) {
+    showToast('Спочатку оберіть фото', 'warn');
     return;
   }
-  if (isListening) stopListening();
-  else startListening();
-};
-
-// ============ PHOTO / OCR ============
-async function handleImageFile(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    showToast('Оберіть зображення', 'error');
-    return;
-  }
-  try {
-    // Store the original blob in IndexedDB
-    await idbPut(IDB_PHOTO_KEY, file);
-    setPreviewFromBlob(file);
-    state.hasPhoto = true;
-    state.ocrResult = '';
-    document.getElementById('ocrResult').value = '';
-    saveState();
-    showPhoto();
-  } catch (e) {
-    console.error(e);
-    showToast('Не вдалося завантажити зображення', 'error');
-  }
-}
-
-document.getElementById('uploadBtn').onclick = () => document.getElementById('fileInput').click();
-document.getElementById('cameraBtn').onclick = () => document.getElementById('cameraInput').click();
-
-document.getElementById('fileInput').onchange = e => {
-  if (e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
-  e.target.value = '';
-};
-document.getElementById('cameraInput').onchange = e => {
-  if (e.target.files && e.target.files[0]) handleImageFile(e.target.files[0]);
-  e.target.value = '';
-};
-
-document.getElementById('photoArea').onclick = (e) => {
-  if (!state.hasPhoto && e.target.closest('#photoPlaceholder')) {
-    document.getElementById('fileInput').click();
-  }
-};
-
-document.getElementById('removePhotoBtn').onclick = async () => {
-  try { await idbDelete(IDB_PHOTO_KEY); } catch(e) {}
-  state.hasPhoto = false;
-  state.ocrResult = '';
-  document.getElementById('ocrResult').value = '';
-  saveState();
-  hidePhoto();
-};
-
-document.getElementById('ocrBtn').onclick = async () => {
-  if (!state.hasPhoto) { showToast('Спочатку додайте фото', 'error'); return; }
-
   if (!canUse('scan')) {
     await limitReachedModal('scan');
     return;
   }
 
   const btn = document.getElementById('ocrBtn');
+  const orig = btn.innerHTML;
   btn.disabled = true;
-  let blob = null;
+
+  const srcLang = document.getElementById('photoSrcLang').value;
+  const tgtLang = document.getElementById('photoTgtLang').value;
+  state.photoSrcLang = srcLang;
+  state.photoTgtLang = tgtLang;
+
+  let imageBlob = null;
   try {
-    blob = await idbGet(IDB_PHOTO_KEY);
-    if (!(blob instanceof Blob)) throw new Error('Зображення не знайдено');
+    imageBlob = await idbGet(IDB_PHOTO_KEY);
+    if (!(imageBlob instanceof Blob)) throw new Error('Фото не знайдено');
 
-    // OCR
-    const text = await performOCR(blob, state.photoSrcLang);
-    incrementUsage('scan');
+    btn.innerHTML = '<span class="loader"></span> Розпізнавання...';
+    const ocrText = await performOCR(imageBlob, srcLang);
+    const cleanText = (ocrText || '').trim();
 
-    const cleanText = (text || '').trim();
     if (!cleanText) {
       document.getElementById('ocrResult').value = '';
-      state.ocrResult = '';
-      saveState();
       showToast('Текст не розпізнано', 'warn');
-      btn.innerHTML = '🔍 Розпізнати і перекласти';
-      btn.disabled = false;
       return;
     }
 
+    let finalText = cleanText;
     let translation = '';
     let provider = '';
-    // Translate if languages differ
-    if (state.photoSrcLang !== state.photoTgtLang) {
+
+    // Translate if target differs
+    if (srcLang !== tgtLang) {
       btn.innerHTML = '<span class="loader"></span> Переклад...';
       try {
-        const res = await translate(cleanText, state.photoSrcLang, state.photoTgtLang);
+        const res = await translate(cleanText, srcLang, tgtLang);
         translation = res.translation;
         provider = res.provider;
+        finalText = `📄 ${LANG_NAMES[srcLang]}:\n${cleanText}\n\n🔄 ${LANG_NAMES[tgtLang]}:\n${translation}`;
       } catch (e) {
-        showToast('OCR готово, але переклад не вдався', 'warn');
+        finalText = `📄 ${cleanText}\n\n⚠️ Переклад недоступний: ${e.message}`;
       }
     }
 
-    const combined = translation
-      ? `📄 РОЗПІЗНАНО:\n${cleanText}\n\n🔄 ПЕРЕКЛАД:\n${translation}`
-      : cleanText;
-    document.getElementById('ocrResult').value = combined;
-    state.ocrResult = combined;
-    saveState();
+    document.getElementById('ocrResult').value = finalText;
+    state.ocrResult = finalText;
+    incrementUsage('scan');
 
-    // Save to scan history
+    // Save scan to history with thumbnail
     try {
-      const thumb = await makeThumbnail(blob, 160);
+      const thumb = await makeThumbnail(imageBlob, 160);
       const record = {
         id: 'scan_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
         time: Date.now(),
-        image: blob,
-        thumb: thumb,
+        image: imageBlob,
+        thumb,
         ocrText: cleanText,
-        translation: translation,
-        provider: provider,
-        srcLang: state.photoSrcLang,
-        tgtLang: state.photoTgtLang,
+        translation,
+        provider,
+        srcLang,
+        tgtLang,
       };
       await scanAdd(record);
       await scanTrim();
+      scansCache = await scanGetAll();
     } catch (e) {
       console.warn('Scan save failed:', e);
     }
 
+    saveState();
     showToast('Готово!', 'success');
   } catch (e) {
     console.error(e);
-    showToast(e.message || 'Помилка розпізнавання', 'error');
+    await alertModal('Помилка розпізнавання', `<p>${escapeHtml(e.message)}</p>`, 'warn');
   } finally {
-    btn.innerHTML = '🔍 Розпізнати і перекласти';
+    btn.innerHTML = orig;
     btn.disabled = false;
   }
-};
+}
 
-document.getElementById('copyOcrBtn').onclick = () => {
-  if (!state.ocrResult.trim()) { showToast('Немає тексту для копіювання', 'warn'); return; }
-  navigator.clipboard?.writeText(state.ocrResult);
-  showToast('Скопійовано!', 'success');
-};
-
-document.getElementById('speakOcrBtn').onclick = () => {
-  const btn = document.getElementById('speakOcrBtn');
-  if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
-    TTS.stop();
+// ============ PHOTO HANDLING ============
+async function handlePhotoFile(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showToast('Оберіть зображення', 'warn');
     return;
   }
-  if (!state.ocrResult.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
-  // Speak translated part if available, else the recognized text
-  const off = TTS.onChange((active) => {
-    if (active) btn._speakToken = active.token;
-    off();
-  });
-  // Prefer target language if translation was done
-  const lang = state.photoSrcLang !== state.photoTgtLang ? state.photoTgtLang : state.photoSrcLang;
-  TTS.speak({ text: state.ocrResult, lang, button: btn });
-};
+  try {
+    await idbPut(IDB_PHOTO_KEY, file);
+    state.hasPhoto = true;
+    state.ocrResult = '';
+    document.getElementById('ocrResult').value = '';
+    setPreviewFromBlob(file);
+    document.getElementById('photoPlaceholder').classList.add('hidden');
+    document.getElementById('photoPreview').classList.remove('hidden');
+    document.getElementById('photoArea').classList.add('has-image');
+    document.getElementById('removePhotoBtn').classList.remove('hidden');
+    saveState();
+    showToast('Фото завантажено', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Помилка завантаження фото', 'error');
+  }
+}
 
-// ============ CLEAR BUTTONS ============
-document.getElementById('clearHistBtn').onclick = async () => {
-  if (state.history.length === 0) { showToast('Історія вже порожня', 'warn'); return; }
-  const ok = await confirmModal(
-    'Очистити історію?',
-    '<p>Уся історія перекладів буде видалена назавжди.</p>',
-    { danger: true, okLabel: 'Очистити', icon: 'warn' }
-  );
-  if (!ok) return;
-  state.history = [];
-  saveState();
-  renderHistory();
-  showToast('Історію очищено', 'success');
-};
-
-document.getElementById('clearSavedBtn').onclick = async () => {
-  if (state.saved.length === 0) { showToast('Немає збережених', 'warn'); return; }
-  const ok = await confirmModal(
-    'Очистити збережені?',
-    '<p>Усі збережені переклади буде видалено назавжди.</p>',
-    { danger: true, okLabel: 'Очистити', icon: 'warn' }
-  );
-  if (!ok) return;
-  state.saved = [];
-  saveState();
-  renderSaved();
-  updateSaveButton();
-  showToast('Збережені очищено', 'success');
-};
-
-document.getElementById('clearScansBtn').onclick = async () => {
-  if (scansCache.length === 0) { showToast('Немає сканувань', 'warn'); return; }
-  const ok = await confirmModal(
-    'Очистити сканування?',
-    '<p>Уся історія сканувань та збережені зображення будуть видалені назавжди.</p>',
-    { danger: true, okLabel: 'Очистити', icon: 'warn' }
-  );
-  if (!ok) return;
-  try { await scanClear(); } catch(e) {}
-  await refreshScans();
-  showToast('Сканування очищено', 'success');
-};
-
-document.getElementById('clearAllBtn').onclick = async () => {
-  const ok = await confirmModal(
-    'Видалити всі дані?',
-    `<p>Це видалить <strong>усе</strong>:</p>
-     <ul>
-       <li>Історію перекладів</li>
-       <li>Збережені переклади</li>
-       <li>Історію сканувань та зображення</li>
-       <li>Поточне фото</li>
-     </ul>
-     <p class="muted">Цю дію неможливо скасувати.</p>`,
-    { danger: true, okLabel: 'Видалити все', icon: 'warn' }
-  );
-  if (!ok) return;
-
-  TTS.stop();
-  state.history = [];
-  state.saved = [];
-  state.srcText = '';
-  state.tgtText = '';
-  state.ocrResult = '';
+async function removePhoto() {
+  try { await idbDelete(IDB_PHOTO_KEY); } catch(e) {}
   state.hasPhoto = false;
-  saveState();
-
-  try { await idbClearStore(); } catch(e) {}
-  try { await scanClear(); } catch(e) {}
-
-  hidePhoto();
-  document.getElementById('srcText').value = '';
-  document.getElementById('tgtText').value = '';
+  state.ocrResult = '';
+  if (_activeObjectURL) {
+    try { URL.revokeObjectURL(_activeObjectURL); } catch(e) {}
+    _activeObjectURL = null;
+  }
+  document.getElementById('photoPreview').src = '';
   document.getElementById('ocrResult').value = '';
-  document.getElementById('providerInfo').classList.add('hidden');
-  scansCache = [];
+  document.getElementById('photoPlaceholder').classList.remove('hidden');
+  document.getElementById('photoPreview').classList.add('hidden');
+  document.getElementById('photoArea').classList.remove('has-image');
+  document.getElementById('removePhotoBtn').classList.add('hidden');
+  saveState();
+}
 
-  renderHistory();
-  renderSaved();
-  renderScans();
-  updateSaveButton();
-  showToast('Усі дані видалено', 'success');
-};
+// ============ SPEECH RECOGNITION (MIC) ============
+function initMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('micBtn');
+  if (!SR) {
+    micBtn.style.display = 'none';
+    return;
+  }
+  let recognizing = false;
+  let recognition = null;
+
+  micBtn.onclick = () => {
+    if (recognizing && recognition) {
+      recognition.stop();
+      return;
+    }
+    recognition = new SR();
+    recognition.lang = SPEECH_LANG_MAP[state.srcLang] || 'uk-UA';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    let finalText = '';
+    recognition.onstart = () => {
+      recognizing = true;
+      micBtn.innerHTML = '⏹ Стоп';
+      micBtn.classList.add('speaking');
+    };
+    recognition.onresult = (e) => {
+      let interim = '';
+      finalText = '';
+      for (let i = 0; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t;
+        else interim += t;
+      }
+      document.getElementById('srcText').value = finalText || interim;
+    };
+    recognition.onerror = (e) => {
+      if (e.error !== 'aborted' && e.error !== 'no-speech') {
+        showToast('Помилка мікрофона: ' + e.error, 'error');
+      }
+    };
+    recognition.onend = () => {
+      recognizing = false;
+      micBtn.innerHTML = '🎤 Голос';
+      micBtn.classList.remove('speaking');
+      const val = document.getElementById('srcText').value.trim();
+      if (val) state.srcText = val;
+    };
+    try {
+      recognition.start();
+    } catch (e) {
+      showToast('Не вдалося запустити мікрофон', 'error');
+    }
+  };
+}
 
 // ============ INFO MODAL ============
-document.getElementById('infoBtn').onclick = async () => {
+async function showInfo() {
   // Build voice info
   let voiceInfo = '';
   try {
@@ -2613,12 +2561,296 @@ document.getElementById('infoBtn').onclick = async () => {
      <p><strong>🌍 Мови:</strong> 🇺🇦 🇬🇧 🇵🇱 🇩🇪 🇨🇿</p>`,
     'info'
   );
-};
+}
+
+// ============ CLEAR ALL DATA ============
+async function clearAllData() {
+  const ok = await confirmModal(
+    'Очистити всі дані?',
+    `<p>Буде видалено <strong>все</strong>:</p>
+     <ul>
+       <li>Історія та збережені переклади</li>
+       <li>Історія сканувань та зображення</li>
+       <li>Поточне фото</li>
+     </ul>
+     <p class="muted">Рекомендуємо спочатку зробити резервну копію (💾).</p>`,
+    { danger: true, okLabel: 'Очистити все', icon: 'warn' }
+  );
+  if (!ok) return;
+
+  try {
+    localStorage.removeItem(STORE_KEY);
+    await idbClearStore();
+    await scanClear();
+    state = {
+      srcLang: 'uk', tgtLang: 'en',
+      srcText: '', tgtText: '',
+      context: 'general', activeTab: 'translate',
+      history: [], saved: [],
+      hasPhoto: false, ocrResult: '',
+      photoSrcLang: 'uk', photoTgtLang: 'en',
+      phraseCat: 'emergency', phraseLang: 'en',
+    };
+    scansCache = [];
+    saveState();
+    await removePhoto();
+    await restoreUI();
+    renderHistory();
+    renderSaved();
+    renderScans();
+    switchTab('translate');
+    showToast('Усі дані очищено', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Помилка очищення', 'error');
+  }
+}
+
+// ============ EVENT BINDINGS ============
+function bindEvents() {
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => switchTab(tab.dataset.tab);
+  });
+
+  // Translate
+  document.getElementById('translateBtn').onclick = doTranslate;
+  document.getElementById('swapBtn').onclick = () => {
+    const s = document.getElementById('srcLang').value;
+    const t = document.getElementById('tgtLang').value;
+    document.getElementById('srcLang').value = t;
+    document.getElementById('tgtLang').value = s;
+    const srcT = document.getElementById('srcText').value;
+    const tgtT = document.getElementById('tgtText').value;
+    document.getElementById('srcText').value = tgtT;
+    document.getElementById('tgtText').value = srcT;
+    Object.assign(state, {
+      srcLang: t, tgtLang: s,
+      srcText: tgtT, tgtText: srcT,
+    });
+    saveState();
+    updateSaveButton();
+  };
+
+  document.getElementById('srcLang').onchange = (e) => {
+    state.srcLang = e.target.value; saveState();
+  };
+  document.getElementById('tgtLang').onchange = (e) => {
+    state.tgtLang = e.target.value; saveState();
+  };
+  document.getElementById('srcText').oninput = (e) => {
+    state.srcText = e.target.value;
+  };
+  document.getElementById('tgtText').oninput = (e) => {
+    state.tgtText = e.target.value;
+    updateSaveButton();
+  };
+
+  document.getElementById('clearSrcBtn').onclick = () => {
+    document.getElementById('srcText').value = '';
+    document.getElementById('tgtText').value = '';
+    state.srcText = '';
+    state.tgtText = '';
+    saveState();
+  };
+
+  document.getElementById('copyBtn').onclick = () => {
+    const txt = document.getElementById('tgtText').value;
+    if (!txt) { showToast('Немає тексту', 'warn'); return; }
+    navigator.clipboard?.writeText(txt);
+    showToast('Скопійовано!', 'success');
+  };
+
+  document.getElementById('speakBtn').onclick = () => {
+    const btn = document.getElementById('speakBtn');
+    const txt = document.getElementById('tgtText').value;
+    if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
+      TTS.stop();
+      return;
+    }
+    if (!txt.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
+    const off = TTS.onChange((active) => {
+      if (active) btn._speakToken = active.token;
+      off();
+    });
+    TTS.speak({ text: txt, lang: state.tgtLang, button: btn });
+  };
+
+  document.getElementById('saveBtn').onclick = () => {
+    if (!state.srcText || !state.tgtText) {
+      showToast('Спочатку перекладіть текст', 'warn');
+      return;
+    }
+    if (isCurrentSaved()) {
+      showToast('Вже збережено', 'warn');
+      return;
+    }
+    state.saved.unshift({
+      src: state.srcText, tgt: state.tgtText,
+      srcLang: state.srcLang, tgtLang: state.tgtLang,
+      time: Date.now(),
+    });
+    if (state.saved.length > 200) state.saved = state.saved.slice(0, 200);
+    saveState();
+    updateSaveButton();
+    showToast('Збережено!', 'success');
+  };
+
+  // Context tags
+  document.querySelectorAll('#contextTags .tag').forEach(tag => {
+    tag.onclick = () => {
+      state.context = tag.dataset.ctx;
+      document.querySelectorAll('#contextTags .tag').forEach(t =>
+        t.classList.toggle('active', t === tag));
+      updateContextNote();
+      saveState();
+    };
+  });
+
+  // Photo
+  document.getElementById('uploadBtn').onclick = () =>
+    document.getElementById('fileInput').click();
+  document.getElementById('cameraBtn').onclick = () =>
+    document.getElementById('cameraInput').click();
+  document.getElementById('photoArea').onclick = (e) => {
+    if (!state.hasPhoto && e.target.closest('#photoPlaceholder')) {
+      document.getElementById('fileInput').click();
+    }
+  };
+  document.getElementById('fileInput').onchange = (e) => {
+    if (e.target.files[0]) handlePhotoFile(e.target.files[0]);
+    e.target.value = '';
+  };
+  document.getElementById('cameraInput').onchange = (e) => {
+    if (e.target.files[0]) handlePhotoFile(e.target.files[0]);
+    e.target.value = '';
+  };
+  document.getElementById('removePhotoBtn').onclick = removePhoto;
+  document.getElementById('ocrBtn').onclick = doOCR;
+
+  document.getElementById('photoSrcLang').onchange = (e) => {
+    state.photoSrcLang = e.target.value; saveState();
+  };
+  document.getElementById('photoTgtLang').onchange = (e) => {
+    state.photoTgtLang = e.target.value; saveState();
+  };
+
+  document.getElementById('copyOcrBtn').onclick = () => {
+    const txt = document.getElementById('ocrResult').value;
+    if (!txt) { showToast('Немає тексту', 'warn'); return; }
+    navigator.clipboard?.writeText(txt);
+    showToast('Скопійовано!', 'success');
+  };
+
+  document.getElementById('speakOcrBtn').onclick = () => {
+    const btn = document.getElementById('speakOcrBtn');
+    const txt = document.getElementById('ocrResult').value;
+    if (btn._speakToken !== undefined && TTS.isCurrent(btn._speakToken)) {
+      TTS.stop();
+      return;
+    }
+    if (!txt.trim()) { showToast('Немає тексту для озвучення', 'warn'); return; }
+    const off = TTS.onChange((active) => {
+      if (active) btn._speakToken = active.token;
+      off();
+    });
+    TTS.speak({ text: txt, lang: state.photoTgtLang, button: btn });
+  };
+
+  // Phrases
+  document.querySelectorAll('#phraseCategories .tag').forEach(tag => {
+    tag.onclick = () => {
+      state.phraseCat = tag.dataset.cat;
+      saveState();
+      renderPhrases();
+    };
+  });
+  document.getElementById('phraseLang').onchange = (e) => {
+    state.phraseLang = e.target.value;
+    saveState();
+    renderPhrases();
+  };
+
+  // Search bars
+  document.getElementById('historySearch').oninput = (e) => {
+    searchQueries.history = e.target.value;
+    renderHistory();
+  };
+  document.getElementById('savedSearch').oninput = (e) => {
+    searchQueries.saved = e.target.value;
+    renderSaved();
+  };
+  document.getElementById('scanSearch').oninput = (e) => {
+    searchQueries.scan = e.target.value;
+    renderScans();
+  };
+
+  // Clear buttons
+  document.getElementById('clearHistBtn').onclick = async () => {
+    if (state.history.length === 0) { showToast('Історія вже порожня', 'warn'); return; }
+    const ok = await confirmModal('Очистити історію?',
+      '<p>Всю історію перекладів буде видалено.</p>',
+      { danger: true, okLabel: 'Очистити', icon: 'warn' });
+    if (ok) {
+      state.history = [];
+      saveState();
+      renderHistory();
+      showToast('Історію очищено', 'success');
+    }
+  };
+
+  document.getElementById('clearSavedBtn').onclick = async () => {
+    if (state.saved.length === 0) { showToast('Немає збережених', 'warn'); return; }
+    const ok = await confirmModal('Очистити збережені?',
+      '<p>Усі збережені переклади буде видалено.</p>',
+      { danger: true, okLabel: 'Очистити', icon: 'warn' });
+    if (ok) {
+      state.saved = [];
+      saveState();
+      renderSaved();
+      updateSaveButton();
+      showToast('Очищено', 'success');
+    }
+  };
+
+  document.getElementById('clearScansBtn').onclick = async () => {
+    if (scansCache.length === 0) { showToast('Немає сканувань', 'warn'); return; }
+    const ok = await confirmModal('Очистити сканування?',
+      '<p>Усі збережені сканування та зображення буде видалено.</p>',
+      { danger: true, okLabel: 'Очистити', icon: 'warn' });
+    if (ok) {
+      await scanClear();
+      scansCache = [];
+      renderScans();
+      showToast('Очищено', 'success');
+    }
+  };
+
+  // Header actions
+  document.getElementById('infoBtn').onclick = showInfo;
+  document.getElementById('clearAllBtn').onclick = clearAllData;
+  document.getElementById('backupBtn').onclick = backupToZip;
+  document.getElementById('restoreBtn').onclick = () =>
+    document.getElementById('restoreInput').click();
+  document.getElementById('restoreInput').onchange = (e) => {
+    if (e.target.files[0]) restoreFromZip(e.target.files[0]);
+    e.target.value = '';
+  };
+}
 
 // ============ INIT ============
-loadState();
-loadUsage();
-restoreUI();
+async function init() {
+  loadState();
+  loadUsage();
+  initLangSelects();
+  bindEvents();
+  initMic();
+  await restoreUI();
+  await refreshScans();
+  switchTab(state.activeTab || 'translate');
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
